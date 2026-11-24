@@ -14,6 +14,7 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const PRIMARY_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b:free';
 const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 
+// Fallback nativo na OpenRouter para redundância em caso de fila no Nemotron
 const FALLBACK_MODELS = [
   'nvidia/nemotron-3-ultra-550b-a55b:free',
   'meta-llama/llama-3.3-70b-instruct:free',
@@ -23,8 +24,8 @@ const FALLBACK_MODELS = [
 app.set('trust proxy', 1);
 
 app.use(cors());
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -49,7 +50,7 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// Extrator resiliente de JSON com suporte a blocos markdown parciais
+// Extrator resiliente de arquivos do projeto gerado pela IA
 function extractProjectFiles(rawText) {
   if (!rawText || typeof rawText !== 'string') {
     throw new Error('A resposta da IA está vazia.');
@@ -57,7 +58,7 @@ function extractProjectFiles(rawText) {
 
   let cleaned = rawText.trim();
 
-  // 1. Tentar localizar bloco ```json ... ```
+  // 1. Tentar bloco ```json ... ```
   const jsonBlock = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
   if (jsonBlock && jsonBlock[1]) {
     cleaned = jsonBlock[1].trim();
@@ -74,11 +75,11 @@ function extractProjectFiles(rawText) {
         return parsed;
       }
     } catch {
-      // Avança para extração por blocos se o JSON estiver incompleto
+      // Avança para parsing por blocos
     }
   }
 
-  // 3. Fallback: extrair múltiplos blocos de código
+  // 3. Fallback inteligente para blocos de código individuais
   const files = [];
   const codeRegex = /```(html|css|javascript|js|json)?\s*(?:<!--\s*([a-zA-Z0-9._-]+)\s*-->|\/\*\s*([a-zA-Z0-9._-]+)\s*\*\/)?\s*([\s\S]*?)```/gi;
   let match;
@@ -106,24 +107,24 @@ function extractProjectFiles(rawText) {
   if (files.length > 0) {
     return {
       projectName: 'Aplicação Web',
-      description: 'Gerado a partir do código estruturado da IA',
+      description: 'Gerado por CodeForge AI',
       summary: 'Arquivos de código criados com sucesso.',
       files: files
     };
   }
 
-  throw new Error('Não foi possível estruturar os arquivos gerados. Por favor, tente novamente com uma instrução mais direta.');
+  throw new Error('Não foi possível estruturar os arquivos. Por favor, reenvie a instrução.');
 }
 
-const SYSTEM_PROMPT = `Você é o CodeForge AI, um ambiente profissional de desenvolvimento.
-Sua resposta DEVE ser ESTRITAMENTE um objeto JSON válido, sem texto introdutório e sem explicações fora do JSON.
-Não utilize emojis em nenhuma parte do código ou textos.
-Gere código web funcional, moderno, sem dependências externas complexas.
+const SYSTEM_PROMPT = `Você é o CodeForge AI, um assistente avançado de engenharia de software para geração de código funcional.
+Sua resposta DEVE ser EXCLUSIVAMENTE um objeto JSON válido, sem texto introdutório antes ou depois.
+Não utilize emojis em nenhuma parte do código ou das mensagens.
+Gere código web moderno, completo, limpo e pronto para execução no navegador.
 
-ESTRUTURA DO JSON:
+ESTRUTURA OBRIGATÓRIA DO JSON:
 {
   "projectName": "Nome do Projeto",
-  "description": "Descrição sucinta",
+  "description": "Breve descrição",
   "summary": "Resumo das funcionalidades criadas",
   "files": [
     {
@@ -139,12 +140,12 @@ ESTRUTURA DO JSON:
     {
       "name": "script.js",
       "language": "javascript",
-      "content": "// código javascript"
+      "content": "// lógica"
     }
   ]
 }`;
 
-// Endpoint com Streaming SSE (Server-Sent Events)
+// Endpoint com Streaming SSE e Proteção contra AbortError
 app.post('/api/generate', async (req, res) => {
   const { prompt, conversationHistory = [], currentFiles = [] } = req.body;
 
@@ -155,24 +156,44 @@ app.post('/api/generate', async (req, res) => {
   const activeApiKey = OPENROUTER_API_KEY.trim();
   if (!activeApiKey) {
     return res.status(500).json({
-      error: 'A chave OPENROUTER_API_KEY não foi configurada nas variáveis de ambiente do Render.'
+      error: 'A chave OPENROUTER_API_KEY não está configurada no painel Environment do Render.'
     });
   }
 
-  // Ativa Server-Sent Events imediatamente para evitar timeout de inatividade no Render
-  res.setHeader('Content-Type', 'text/event-stream');
+  // Cabeçalhos essenciais para desativar buffer no proxy do Render / Cloudflare
+  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders?.();
 
   const sendEvent = (event, payload) => {
-    res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+    if (!res.writableEnded) {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+    }
   };
 
-  sendEvent('status', { message: 'A conectar à OpenRouter (Nemotron 3 Ultra)...' });
+  // Heartbeat periódico para manter o socket do Render vivo enquanto o modelo processa
+  const heartbeatInterval = setInterval(() => {
+    if (!res.writableEnded) {
+      res.write(':\n\n'); // Comentário SSE oficial de keep-alive
+    }
+  }, 10000);
 
+  sendEvent('status', { message: 'A contactar a OpenRouter (Nemotron 3 Ultra)...' });
+
+  // Controlador de Timeout interno de 180s (tempo amplo para o Nemotron 550B gerar todo o código)
   const controller = new AbortController();
-  req.on('close', () => controller.abort());
+  const apiTimeout = setTimeout(() => controller.abort(), 180000);
+
+  // IMPORTANTE: Escutar apenas 'close' na RESPOSTA (res), garantindo que só aborta se o utilizador fechar a página
+  res.on('close', () => {
+    clearTimeout(apiTimeout);
+    clearInterval(heartbeatInterval);
+    if (!res.writableEnded) {
+      controller.abort();
+    }
+  });
 
   try {
     const messages = [{ role: 'system', content: SYSTEM_PROMPT }];
@@ -190,11 +211,11 @@ app.post('/api/generate', async (req, res) => {
 
     let contextualPrompt = prompt.trim();
     if (Array.isArray(currentFiles) && currentFiles.length > 0) {
-      contextualPrompt += '\n\n--- CÓDIGO ATUAL DOS ARQUIVOS ---\n';
+      contextualPrompt += '\n\n--- CÓDIGO ATUAL DO PROJETO ---\n';
       for (const f of currentFiles) {
         contextualPrompt += `\n[${f.name}]\n${f.content}\n`;
       }
-      contextualPrompt += '\n--- FIM DOS ARQUIVOS ---\nAtualize preservando o código estável e retorne todos os arquivos completos no JSON.';
+      contextualPrompt += '\n--- FIM DO CÓDIGO ATUAL ---\nAtualize preservando estabilidade e retorne todos os arquivos completos no JSON.';
     }
 
     messages.push({ role: 'user', content: contextualPrompt });
@@ -206,7 +227,7 @@ app.post('/api/generate', async (req, res) => {
       headers: {
         'Authorization': `Bearer ${activeApiKey}`,
         'HTTP-Referer': siteUrl,
-        'X-Title': 'CodeForge AI on Render',
+        'X-Title': 'CodeForge AI Platform',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -226,6 +247,8 @@ app.post('/api/generate', async (req, res) => {
       if (openRouterResponse.status === 401) errorMsg = 'Chave OPENROUTER_API_KEY inválida.';
       if (openRouterResponse.status === 429) errorMsg = 'Limite de taxa excedido na OpenRouter. Aguarde alguns instantes.';
       
+      clearInterval(heartbeatInterval);
+      clearTimeout(apiTimeout);
       sendEvent('error', { error: errorMsg, details: errText });
       return res.end();
     }
@@ -257,17 +280,20 @@ app.post('/api/generate', async (req, res) => {
             if (delta) {
               fullAccumulatedText += delta;
               const now = Date.now();
-              if (now - lastProgressUpdate > 300) {
+              if (now - lastProgressUpdate > 250) {
                 lastProgressUpdate = now;
                 sendEvent('progress', { charCount: fullAccumulatedText.length });
               }
             }
           } catch {
-            // Ignora fragmentos temporários de JSON
+            // Fragmentos de streaming parciais são esperados
           }
         }
       }
     }
+
+    clearInterval(heartbeatInterval);
+    clearTimeout(apiTimeout);
 
     sendEvent('status', { message: 'A compilar arquivos e preparar o preview...' });
 
@@ -276,9 +302,15 @@ app.post('/api/generate', async (req, res) => {
     res.end();
 
   } catch (err) {
+    clearInterval(heartbeatInterval);
+    clearTimeout(apiTimeout);
+
     console.error('[Streaming Error]', err);
     if (!res.writableEnded) {
-      sendEvent('error', { error: err.message || 'Erro durante o streaming do código.' });
+      const msg = err.name === 'AbortError'
+        ? 'A requisição demorou mais de 3 minutos e atingiu o tempo limite. Tente uma instrução mais concisa.'
+        : (err.message || 'Erro durante o streaming do código.');
+      sendEvent('error', { error: msg });
       res.end();
     }
   }

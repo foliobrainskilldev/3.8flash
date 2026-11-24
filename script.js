@@ -1,6 +1,6 @@
 /**
  * CODEFORGE AI — Lógica do Frontend
- * Suporte nativo a Server-Sent Events (SSE) e atualização contínua de progresso
+ * Leitura resiliente de fluxo SSE sem bloqueio por tempo limite do cliente
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -251,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Indicador de Carregamento Ativo com Contador em Tempo Real
   function createThinkingBubble() {
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble assistant';
@@ -262,9 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="thinking-header">
           <div class="pulse-dot"></div>
           <span id="thinking-model-title">Nemotron 3 Ultra em execução...</span>
-          <span class="thinking-counter-badge" id="thinking-counter-badge">A iniciar</span>
+          <span class="thinking-counter-badge" id="thinking-counter-badge">A ligar</span>
         </div>
-        <div class="thinking-status-text" id="thinking-step-text">A conectar à OpenRouter...</div>
+        <div class="thinking-status-text" id="thinking-step-text">A contactar a OpenRouter...</div>
       </div>
     `;
 
@@ -279,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       updateCount: (chars) => {
         const badge = document.getElementById('thinking-counter-badge');
-        if (badge) badge.textContent = `${chars} caracteres gerados`;
+        if (badge) badge.textContent = `${chars.toLocaleString()} chars gerados`;
       },
       remove: () => {
         const elem = document.getElementById('active-thinking-bubble');
@@ -288,7 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Submissão com Leitura de Stream (SSE)
   async function submitInstruction(instructionText) {
     if (!instructionText || state.isGenerating) return;
 
@@ -317,10 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (!response.ok) {
-        throw new Error(`O servidor retornou status ${response.status}`);
+        throw new Error(`O servidor retornou erro HTTP ${response.status}`);
       }
 
-      // Leitura contínua dos eventos SSE
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -361,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (!projectPayload || !projectPayload.files) {
-        throw new Error('Não foi possível compilar a resposta da IA.');
+        throw new Error('Não foi possível estruturar os arquivos devolvidos.');
       }
 
       state.currentProject = projectPayload;
