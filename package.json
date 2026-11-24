@@ -1,0 +1,26 @@
+{
+  "name": "codeforge-ai",
+  "version": "1.0.0",
+  "description": "Gerador de código-fonte profissional com IA através da OpenRouter - Otimizado para Render",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "ai",
+    "code-generator",
+    "openrouter",
+    "monaco-editor",
+    "render-ready"
+  ],
+  "author": "CodeForge AI Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

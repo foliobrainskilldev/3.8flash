@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeForge AI — Gerador de Código Profissional</title>
+  
+  <!-- Tipografia Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Folha de Estilos Principal -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- JSZip para exportação completa de projetos (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Monaco Editor Loader (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Cabeçalho Principal -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-icon">
+            <i data-lucide="code-2"></i>
+          </div>
+          <span class="brand-name">CodeForge <span>AI</span></span>
+        </div>
+
+        <div class="separator-vertical"></div>
+
+        <div class="status-badge" id="api-status-badge">
+          <span class="status-dot"></span>
+          <span class="status-text" id="api-status-text">A verificar conexão...</span>
+        </div>
+
+        <div class="model-badge">
+          <i data-lucide="cpu"></i>
+          <span>nemotron-3-ultra-550b-a55b</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="btn btn-secondary" id="btn-new-project" title="Iniciar um novo projeto">
+          <i data-lucide="plus"></i>
+          <span>Novo Projeto</span>
+        </button>
+
+        <button class="btn btn-icon" id="btn-open-settings" title="Definições e Informações">
+          <i data-lucide="settings"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Layout Dividido (Split Layout) -->
+    <main class="main-layout">
+      
+      <!-- Painel Esquerdo: Chat e Histórico Contínuo -->
+      <section class="chat-panel" id="chat-panel">
+        
+        <!-- Lista de Mensagens / Conversa -->
+        <div class="chat-messages" id="chat-messages">
+          
+          <!-- Estado Inicial / Vazio -->
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon-wrap">
+              <i data-lucide="terminal"></i>
+            </div>
+            <h2>O que pretende construir hoje?</h2>
+            <p>Descreva detalhadamente a sua ideia. O CodeForge AI gerará código funcional, estruturado em múltiplos arquivos com pré-visualização em tempo real.</p>
+            
+            <div class="suggestions-grid">
+              <button class="suggestion-card" data-prompt="Crie um website profissional para uma clínica odontológica com página inicial, serviços, contactos e formulário de marcação funcional.">
+                <div class="suggestion-title">
+                  <i data-lucide="layout"></i>
+                  <span>Website de Clínica</span>
+                </div>
+                <div class="suggestion-desc">Página moderna, lista de serviços e marcação de consultas.</div>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Desenvolva uma aplicação de gestão de tarefas (Kanban board) com colunas A Fazer, Em Progresso e Concluído, com persistência local.">
+                <div class="suggestion-title">
+                  <i data-lucide="kanban"></i>
+                  <span>Painel Kanban</span>
+                </div>
+                <div class="suggestion-desc">Arrastar e soltar itens, filtros e contadores.</div>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Crie uma calculadora financeira com simulação de juros compostos, amortização de crédito e gráficos em SVG.">
+                <div class="suggestion-title">
+                  <i data-lucide="calculator"></i>
+                  <span>Calculadora Financeira</span>
+                </div>
+                <div class="suggestion-desc">Simulação de investimentos e cálculo de retorno.</div>
+              </button>
+
+              <button class="suggestion-card" data-prompt="Crie uma página de destino (Landing Page) para um produto SaaS com tabela comparativa de preços, FAQ e modo escuro.">
+                <div class="suggestion-title">
+                  <i data-lucide="rocket"></i>
+                  <span>Landing Page SaaS</span>
+                </div>
+                <div class="suggestion-desc">Tabelas interativas, accordion e formulário de contacto.</div>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Barra de Ações Rápidas -->
+        <div class="quick-actions-bar" id="quick-actions-bar">
+          <button class="quick-chip" id="chip-fix">
+            <i data-lucide="wrench"></i>
+            <span>Corrigir código</span>
+          </button>
+          <button class="quick-chip" id="chip-improve">
+            <i data-lucide="sparkles"></i>
+            <span>Melhorar design</span>
+          </button>
+          <button class="quick-chip" id="chip-explain">
+            <i data-lucide="file-question"></i>
+            <span>Explicar código</span>
+          </button>
+        </div>
+
+        <!-- Área de Entrada de Instrução -->
+        <div class="chat-input-area">
+          <form class="prompt-form" id="prompt-form">
+            <div class="textarea-wrapper">
+              <textarea 
+                id="prompt-input" 
+                rows="3" 
+                placeholder="Descreva a aplicação ou instrua a alteração necessária..."
+                required
+              ></textarea>
+            </div>
+            
+            <div class="input-bottom-bar">
+              <span class="input-hint">Pressione Enter para enviar, Shift+Enter para nova linha</span>
+              
+              <button type="submit" class="btn btn-primary" id="btn-submit">
+                <i data-lucide="send" id="submit-icon"></i>
+                <span id="submit-text">Gerar código</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Painel Direito: Editor Monaco e Preview -->
+      <section class="workspace-panel" id="workspace-panel">
+        
+        <!-- Barra Superior de Controle do Workspace -->
+        <div class="workspace-header">
+          
+          <!-- Seleção de Modo (Código vs Preview) -->
+          <div class="view-switcher">
+            <button class="view-btn active" id="tab-btn-code" data-view="code">
+              <i data-lucide="code"></i>
+              <span>Código</span>
+            </button>
+            <button class="view-btn" id="tab-btn-preview" data-view="preview">
+              <i data-lucide="play"></i>
+              <span>Preview</span>
+              <span class="preview-indicator" id="preview-update-dot"></span>
+            </button>
+          </div>
+
+          <!-- Barra de Arquivos Gerados (Tabs) -->
+          <div class="file-tabs-container" id="file-tabs-bar">
+            <!-- Tabs dinâmicas injetadas via JavaScript -->
+          </div>
+
+          <!-- Ferramentas de Exportação e Execução -->
+          <div class="workspace-tools">
+            <button class="tool-btn" id="btn-copy-code" title="Copiar código do arquivo ativo">
+              <i data-lucide="copy"></i>
+              <span>Copiar</span>
+            </button>
+            <button class="tool-btn" id="btn-download-file" title="Descarregar arquivo ativo">
+              <i data-lucide="download"></i>
+              <span>Arquivo</span>
+            </button>
+            <button class="tool-btn" id="btn-download-zip" title="Descarregar projeto completo (ZIP)">
+              <i data-lucide="archive"></i>
+              <span>ZIP</span>
+            </button>
+            
+            <div class="separator-vertical"></div>
+
+            <button class="tool-btn" id="btn-refresh-preview" title="Atualizar Pré-visualização">
+              <i data-lucide="rotate-cw"></i>
+            </button>
+            <button class="tool-btn" id="btn-open-window" title="Abrir em Nova Janela">
+              <i data-lucide="external-link"></i>
+            </button>
+            <button class="tool-btn" id="btn-fullscreen-toggle" title="Alternar Ecrã Inteiro">
+              <i data-lucide="maximize-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Conteúdo do Workspace: Editor e Preview -->
+        <div class="workspace-body">
+          
+          <!-- Container do Monaco Editor -->
+          <div class="view-pane active" id="code-view-pane">
+            <div id="monaco-container"></div>
+          </div>
+
+          <!-- Container do Preview -->
+          <div class="view-pane" id="preview-view-pane">
+            <div class="preview-responsive-toolbar">
+              <div class="device-switcher">
+                <button class="device-btn active" data-width="100%">
+                  <i data-lucide="monitor"></i>
+                  <span>Desktop</span>
+                </button>
+                <button class="device-btn" data-width="768px">
+                  <i data-lucide="tablet"></i>
+                  <span>Tablet (768px)</span>
+                </button>
+                <button class="device-btn" data-width="375px">
+                  <i data-lucide="smartphone"></i>
+                  <span>Mobile (375px)</span>
+                </button>
+              </div>
+              
+              <div class="preview-url-bar">
+                <i data-lucide="lock"></i>
+                <span id="preview-mock-url">https://codeforge-sandbox.local/index.html</span>
+              </div>
+            </div>
+
+            <div class="preview-frame-container" id="preview-frame-wrapper">
+              <iframe 
+                id="preview-iframe" 
+                sandbox="allow-scripts allow-modals allow-forms allow-same-origin" 
+                title="Pré-visualização da Aplicação">
+              </iframe>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Modal de Definições e Ajuda -->
+    <div class="modal-overlay" id="settings-modal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title">
+            <i data-lucide="sliders"></i>
+            <h3>Definições do CodeForge AI</h3>
+          </div>
+          <button class="btn-icon" id="btn-close-modal">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="info-group">
+            <label>Modelo de Inteligência Artificial Ativo</label>
+            <input type="text" value="nvidia/nemotron-3-ultra-550b-a55b:free" readonly class="input-readonly">
+            <span class="info-text">Executado exclusivamente via OpenRouter API em modo de alta capacidade.</span>
+          </div>
+
+          <div class="info-group">
+            <label>Estado da Autenticação</label>
+            <div class="badge-status-box" id="modal-key-status">
+              <span class="status-dot"></span>
+              <span id="modal-key-text">A validar chave no servidor...</span>
+            </div>
+            <span class="info-text">A chave OPENROUTER_API_KEY deve ser configurada nas variáveis de ambiente do servidor Node.js.</span>
+          </div>
+
+          <div class="info-group">
+            <label>Histórico e Dados Locais</label>
+            <button class="btn btn-danger-outline" id="btn-clear-storage">
+              <i data-lucide="trash-2"></i>
+              <span>Limpar projetos guardados localmente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btn-confirm-settings">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sistema de Notificações Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+  <!-- Script Principal -->
+  <script src="script.js"></script>
+</body>
+</html>
