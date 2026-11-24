@@ -20,7 +20,7 @@
 
   --accent-blue: #2563EB;
   --accent-blue-hover: #1D4ED8;
-  --accent-coral: #E11D48; /* Tom coral de destaque das referências */
+  --accent-coral: #E11D48;
   --accent-coral-glow: rgba(225, 29, 72, 0.12);
 
   --accent-green: #059669;
@@ -64,9 +64,7 @@ body {
   overflow: hidden;
 }
 
-/* ==========================================================================
-   Header Superior
-   ========================================================================== */
+/* Header */
 .app-header {
   height: var(--header-height);
   border-bottom: 1px solid var(--border-color);
@@ -172,9 +170,7 @@ body {
   height: 13px;
 }
 
-/* ==========================================================================
-   Layout Principal
-   ========================================================================== */
+/* Layout Principal */
 .main-layout {
   display: grid;
   grid-template-columns: 440px 1fr;
@@ -183,9 +179,7 @@ body {
   overflow: hidden;
 }
 
-/* ==========================================================================
-   Painel Esquerdo (Chat Elegante com Brilho Ambiente)
-   ========================================================================== */
+/* Painel Esquerdo */
 .chat-panel {
   position: relative;
   border-right: 1px solid var(--border-color);
@@ -196,7 +190,6 @@ body {
   overflow: hidden;
 }
 
-/* Brilho Ambiente Superior (Inspirado na Imagem 3 - Orbix AI) */
 .ambient-glow {
   position: absolute;
   top: 0;
@@ -219,7 +212,7 @@ body {
   z-index: 2;
 }
 
-/* Apresentação Inicial (Welcome Hero) */
+/* Welcome Container */
 .welcome-container {
   display: flex;
   flex-direction: column;
@@ -265,7 +258,6 @@ body {
   margin-bottom: 1.5rem;
 }
 
-/* Card "Talk with your AI" (Imagem 3) */
 .feature-card {
   width: 100%;
   background: var(--bg-card);
@@ -303,7 +295,6 @@ body {
   line-height: 1.45;
 }
 
-/* Chips Deslizantes */
 .suggestions-label {
   align-self: flex-start;
   font-size: 0.75rem;
@@ -348,7 +339,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-/* Bolhas de Conversa */
+/* Bolhas de Mensagem */
 .message-bubble {
   display: flex;
   flex-direction: column;
@@ -437,7 +428,7 @@ body {
   height: 12px;
 }
 
-/* Indicador de Processamento Ativo (Thinking State) */
+/* Thinking State com Badge Dinâmico de Progresso */
 .thinking-bubble {
   background-color: #FFFFFF;
   border: 1px solid var(--border-color);
@@ -458,6 +449,17 @@ body {
   color: var(--accent-blue);
 }
 
+.thinking-counter-badge {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+}
+
 .pulse-dot {
   width: 8px;
   height: 8px;
@@ -476,9 +478,7 @@ body {
   color: var(--text-secondary);
 }
 
-/* ==========================================================================
-   Barra de Entrada Flutuante (Floating Prompt Bar - Imagens 1, 2 e 3)
-   ========================================================================== */
+/* Barra Flutuante de Prompt */
 .chat-input-wrapper {
   padding: 0 1.25rem 1.25rem 1.25rem;
   background: linear-gradient(to top, #FFFFFF 75%, rgba(255, 255, 255, 0));
@@ -567,7 +567,6 @@ body {
   font-size: 0.72rem;
   font-family: var(--font-mono);
   color: var(--text-secondary);
-  cursor: default;
 }
 
 .model-select-pill i {
@@ -575,7 +574,6 @@ body {
   height: 12px;
 }
 
-/* Botão Waveform de Envio Circular (Inspirado nas Imagens 1, 2 e 3) */
 .submit-waveform-btn {
   width: 36px;
   height: 36px;
@@ -620,9 +618,7 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ==========================================================================
-   Workspace Direito (Monaco Editor & Preview)
-   ========================================================================== */
+/* Workspace e Editor */
 .workspace-panel {
   display: flex;
   flex-direction: column;
@@ -778,7 +774,6 @@ body {
   height: 100%;
 }
 
-/* Área de Preview */
 .preview-responsive-toolbar {
   height: 38px;
   background-color: var(--bg-subtle);
@@ -852,7 +847,6 @@ body {
   transition: width 0.2s ease;
 }
 
-/* Componentes Genéricos de Botões */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -905,7 +899,6 @@ body {
   border: 1px solid var(--accent-red);
 }
 
-/* Modais & Toasts */
 .modal-overlay {
   position: fixed;
   inset: 0;

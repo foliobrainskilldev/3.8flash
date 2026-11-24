@@ -1,6 +1,6 @@
 /**
  * CODEFORGE AI — Lógica do Frontend
- * Atualizado com Thinking State animado, prevenção de bloqueio de botão e timeout de segurança
+ * Suporte nativo a Server-Sent Events (SSE) e atualização contínua de progresso
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           name: 'index.html',
           language: 'html',
-          content: '<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>CodeForge AI App</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <div class="welcome-box">\n    <h1>CodeForge AI</h1>\n    <p>Pronto. Descreva a sua aplicação na caixa à esquerda para começar.</p>\n  </div>\n  <script src="script.js"></script>\n</body>\n</html>'
+          content: '<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>CodeForge AI App</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <div class="welcome-box">\n    <h1>CodeForge AI</h1>\n    <p>Pronto. Descreva a aplicação desejada na caixa à esquerda.</p>\n  </div>\n  <script src="script.js"></script>\n</body>\n</html>'
         },
         {
           name: 'style.css',
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           name: 'script.js',
           language: 'javascript',
-          content: '// Código funcional da aplicação\nconsole.log("CodeForge AI: Ambiente de execução pronto.");'
+          content: '// Código funcional da aplicação\nconsole.log("CodeForge AI: Pronto.");'
         }
       ]
     },
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     promptInput: document.getElementById('prompt-input'),
     btnSubmit: document.getElementById('btn-submit'),
     submitIcon: document.getElementById('submit-icon'),
-    submitText: document.getElementById('submit-text'),
 
     chipFix: document.getElementById('chip-fix'),
     chipImprove: document.getElementById('chip-improve'),
@@ -79,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
     toastContainer: document.getElementById('toast-container')
   };
 
-  // Inicialização Monaco Editor
   function initMonacoEditor() {
     window.require.config({ 
       paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } 
@@ -164,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const jsFile = state.currentProject.files.find(f => f.name.endsWith('.js'));
 
     if (!htmlFile) {
-      elements.previewIframe.srcdoc = '<p style="padding: 2rem; font-family: sans-serif;">Nenhum arquivo HTML disponível para exibição.</p>';
+      elements.previewIframe.srcdoc = '<p style="padding: 2rem; font-family: sans-serif;">Nenhum arquivo HTML disponível.</p>';
       return;
     }
 
@@ -253,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Indicador de Carregamento Ativo (Thinking State)
+  // Indicador de Carregamento Ativo com Contador em Tempo Real
   function createThinkingBubble() {
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble assistant';
@@ -263,9 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="thinking-bubble">
         <div class="thinking-header">
           <div class="pulse-dot"></div>
-          <span>A processar com Nemotron 3 Ultra...</span>
+          <span id="thinking-model-title">Nemotron 3 Ultra em execução...</span>
+          <span class="thinking-counter-badge" id="thinking-counter-badge">A iniciar</span>
         </div>
-        <div class="thinking-status-text" id="thinking-step-text">A contactar a inteligência artificial...</div>
+        <div class="thinking-status-text" id="thinking-step-text">A conectar à OpenRouter...</div>
       </div>
     `;
 
@@ -273,32 +272,23 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
     lucide.createIcons();
 
-    // Atualização dinâmica de etapas para garantir feedback visual
-    let step = 0;
-    const steps = [
-      'A sintetizar componentes e lógica...',
-      'A gerar múltiplos arquivos funcionais...',
-      'A validar integridade do código...'
-    ];
-
-    const interval = setInterval(() => {
-      const stepElem = document.getElementById('thinking-step-text');
-      if (stepElem && step < steps.length) {
-        stepElem.textContent = steps[step];
-        step++;
-      } else {
-        clearInterval(interval);
+    return {
+      updateStatus: (msg) => {
+        const textElem = document.getElementById('thinking-step-text');
+        if (textElem) textElem.textContent = msg;
+      },
+      updateCount: (chars) => {
+        const badge = document.getElementById('thinking-counter-badge');
+        if (badge) badge.textContent = `${chars} caracteres gerados`;
+      },
+      remove: () => {
+        const elem = document.getElementById('active-thinking-bubble');
+        if (elem) elem.remove();
       }
-    }, 4500);
-
-    return () => {
-      clearInterval(interval);
-      const elem = document.getElementById('active-thinking-bubble');
-      if (elem) elem.remove();
     };
   }
 
-  // Submissão com Resiliência e Prevenção de Bloqueios
+  // Submissão com Leitura de Stream (SSE)
   async function submitInstruction(instructionText) {
     if (!instructionText || state.isGenerating) return;
 
@@ -313,11 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.conversationHistory.push({ role: 'user', content: prompt });
     setGeneratingState(true);
 
-    const removeThinking = createThinkingBubble();
-
-    // AbortController no cliente com 80 segundos
-    const clientController = new AbortController();
-    const clientTimeout = setTimeout(() => clientController.abort(), 80000);
+    const thinkingUI = createThinkingBubble();
 
     try {
       const response = await fetch('/api/generate', {
@@ -327,32 +313,65 @@ document.addEventListener('DOMContentLoaded', () => {
           prompt: prompt,
           conversationHistory: state.conversationHistory,
           currentFiles: state.currentProject.files
-        }),
-        signal: clientController.signal
+        })
       });
 
-      clearTimeout(clientTimeout);
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error('O servidor respondeu com um formato inesperado. A instância pode estar reiniciando.');
+      if (!response.ok) {
+        throw new Error(`O servidor retornou status ${response.status}`);
       }
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Falha ao processar instrução.');
+      // Leitura contínua dos eventos SSE
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let projectPayload = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const blocks = buffer.split('\n\n');
+        buffer = blocks.pop() || '';
+
+        for (const block of blocks) {
+          if (!block.trim()) continue;
+          let eventType = 'message';
+          let dataStr = '';
+
+          const lines = block.split('\n');
+          for (const l of lines) {
+            if (l.startsWith('event: ')) eventType = l.slice(7).trim();
+            if (l.startsWith('data: ')) dataStr = l.slice(6).trim();
+          }
+
+          if (dataStr) {
+            const parsedData = JSON.parse(dataStr);
+            if (eventType === 'status') {
+              thinkingUI.updateStatus(parsedData.message);
+            } else if (eventType === 'progress') {
+              thinkingUI.updateCount(parsedData.charCount);
+            } else if (eventType === 'complete') {
+              projectPayload = parsedData.project;
+            } else if (eventType === 'error') {
+              throw new Error(parsedData.error);
+            }
+          }
+        }
       }
 
-      state.currentProject = data.project;
-      
+      if (!projectPayload || !projectPayload.files) {
+        throw new Error('Não foi possível compilar a resposta da IA.');
+      }
+
+      state.currentProject = projectPayload;
       state.conversationHistory.push({
         role: 'assistant',
-        content: `Projeto: ${data.project.projectName}. Resumo: ${data.project.summary}`
+        content: `Projeto: ${projectPayload.projectName}. Resumo: ${projectPayload.summary}`
       });
 
-      removeThinking();
-      appendMessageToChat('assistant', data.project.summary, data.project.files);
+      thinkingUI.remove();
+      appendMessageToChat('assistant', projectPayload.summary, projectPayload.files);
 
       const primaryFile = state.currentProject.files.find(f => f.name === 'index.html') || state.currentProject.files[0];
       state.activeFile = primaryFile.name;
@@ -368,16 +387,11 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Código gerado e compilado com sucesso.', 'success');
 
     } catch (err) {
-      removeThinking();
+      thinkingUI.remove();
       console.error(err);
-      const errMsg = err.name === 'AbortError' 
-        ? 'A requisição excedeu o tempo limite. O modelo estava sobrecarregado, por favor tente novamente.' 
-        : err.message;
-      
-      appendMessageToChat('assistant', `Aviso: ${errMsg}`);
-      showToast(errMsg, 'error');
+      appendMessageToChat('assistant', `Aviso: ${err.message}`);
+      showToast(err.message, 'error');
     } finally {
-      clearTimeout(clientTimeout);
       setGeneratingState(false);
       elements.promptInput.value = '';
       adjustTextareaHeight();
@@ -466,11 +480,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   elements.chipFix.addEventListener('click', () => {
-    submitInstruction('Analise o código atual de todos os arquivos, corrija erros e inconsistências mantendo o projeto estável.');
+    submitInstruction('Analise todos os arquivos atuais, corrija erros e garanta total estabilidade.');
   });
 
   elements.chipImprove.addEventListener('click', () => {
-    submitInstruction('Melhore a estética, contraste visual, tipografia e espaçamento dos componentes existentes.');
+    submitInstruction('Aprimore a tipografia, o contraste visual e o espaçamento dos componentes existentes.');
   });
 
   elements.btnCopyCode.addEventListener('click', async () => {
