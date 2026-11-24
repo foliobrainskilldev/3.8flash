@@ -5,21 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CodeForge AI — Gerador de Código Profissional</title>
   
-  <!-- Tipografia Inter -->
+  <!-- Fontes Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
-  <!-- Folha de Estilos Principal -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- Lucide Icons (CDN) -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- JSZip para exportação completa de projetos (CDN) -->
+  <!-- JSZip -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-  <!-- Monaco Editor Loader (CDN) -->
+  <!-- Monaco Editor AMD Loader -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 </head>
 <body>
@@ -30,7 +29,7 @@
       <div class="header-left">
         <div class="brand">
           <div class="brand-icon">
-            <i data-lucide="code-2"></i>
+            <i data-lucide="sparkles"></i>
           </div>
           <span class="brand-name">CodeForge <span>AI</span></span>
         </div>
@@ -39,12 +38,12 @@
 
         <div class="status-badge" id="api-status-badge">
           <span class="status-dot"></span>
-          <span class="status-text" id="api-status-text">A verificar conexão...</span>
+          <span class="status-text" id="api-status-text">Conectando...</span>
         </div>
 
         <div class="model-badge">
           <i data-lucide="cpu"></i>
-          <span>nemotron-3-ultra-550b-a55b</span>
+          <span>nemotron-3-ultra-550b</span>
         </div>
       </div>
 
@@ -55,112 +54,114 @@
         </button>
 
         <button class="btn btn-icon" id="btn-open-settings" title="Definições e Informações">
-          <i data-lucide="settings"></i>
+          <i data-lucide="sliders"></i>
         </button>
       </div>
     </header>
 
-    <!-- Layout Dividido (Split Layout) -->
+    <!-- Layout Dividido -->
     <main class="main-layout">
       
-      <!-- Painel Esquerdo: Chat e Histórico Contínuo -->
+      <!-- Painel Esquerdo: Chat com Design Moderno (Imagens de Referência) -->
       <section class="chat-panel" id="chat-panel">
         
-        <!-- Lista de Mensagens / Conversa -->
+        <!-- Glow Ambiente Superior (Referência Orbix AI) -->
+        <div class="ambient-glow"></div>
+
+        <!-- Área de Mensagens e Boas-Vindas -->
         <div class="chat-messages" id="chat-messages">
           
-          <!-- Estado Inicial / Vazio -->
-          <div class="empty-state" id="empty-state">
-            <div class="empty-icon-wrap">
-              <i data-lucide="terminal"></i>
+          <!-- Card de Apresentação Inicial -->
+          <div class="welcome-container" id="empty-state">
+            <div class="welcome-badge">
+              <i data-lucide="layers"></i>
+              <span>Orbix Engine 2.0</span>
             </div>
-            <h2>O que pretende construir hoje?</h2>
-            <p>Descreva detalhadamente a sua ideia. O CodeForge AI gerará código funcional, estruturado em múltiplos arquivos com pré-visualização em tempo real.</p>
+
+            <h1 class="welcome-title">O que pretende construir hoje?</h1>
+            <p class="welcome-subtitle">O seu assistente de inteligência artificial para planeamento, geração e execução de aplicações completas em tempo real.</p>
             
-            <div class="suggestions-grid">
-              <button class="suggestion-card" data-prompt="Crie um website profissional para uma clínica odontológica com página inicial, serviços, contactos e formulário de marcação funcional.">
-                <div class="suggestion-title">
-                  <i data-lucide="layout"></i>
-                  <span>Website de Clínica</span>
+            <!-- Card Talk with your AI (Referência Imagem 3) -->
+            <div class="feature-card">
+              <div class="feature-card-header">
+                <i data-lucide="bot"></i>
+                <div>
+                  <h4>Talk with your AI</h4>
+                  <p>Escreva a sua instrução para gerar arquivos completos com Monaco Editor e Live Preview instantâneo.</p>
                 </div>
-                <div class="suggestion-desc">Página moderna, lista de serviços e marcação de consultas.</div>
-              </button>
+              </div>
+            </div>
 
-              <button class="suggestion-card" data-prompt="Desenvolva uma aplicação de gestão de tarefas (Kanban board) com colunas A Fazer, Em Progresso e Concluído, com persistência local.">
-                <div class="suggestion-title">
-                  <i data-lucide="kanban"></i>
-                  <span>Painel Kanban</span>
-                </div>
-                <div class="suggestion-desc">Arrastar e soltar itens, filtros e contadores.</div>
+            <!-- Chips de Sugestões Rápidas (Referência Imagens 1 e 3) -->
+            <div class="suggestions-label">Sugestões prontas para iniciar:</div>
+            <div class="suggestions-slider">
+              <button class="pill-chip" data-prompt="Crie um website profissional para uma clínica odontológica com serviços, corpo clínico e formulário de agendamento funcional.">
+                <i data-lucide="activity"></i>
+                <span>Website Clínico</span>
               </button>
-
-              <button class="suggestion-card" data-prompt="Crie uma calculadora financeira com simulação de juros compostos, amortização de crédito e gráficos em SVG.">
-                <div class="suggestion-title">
-                  <i data-lucide="calculator"></i>
-                  <span>Calculadora Financeira</span>
-                </div>
-                <div class="suggestion-desc">Simulação de investimentos e cálculo de retorno.</div>
+              <button class="pill-chip" data-prompt="Desenvolva um painel Kanban com colunas A Fazer, Em Progresso e Concluído com suporte a arrastar e soltar e localStorage.">
+                <i data-lucide="kanban"></i>
+                <span>Quadro Kanban</span>
               </button>
-
-              <button class="suggestion-card" data-prompt="Crie uma página de destino (Landing Page) para um produto SaaS com tabela comparativa de preços, FAQ e modo escuro.">
-                <div class="suggestion-title">
-                  <i data-lucide="rocket"></i>
-                  <span>Landing Page SaaS</span>
-                </div>
-                <div class="suggestion-desc">Tabelas interativas, accordion e formulário de contacto.</div>
+              <button class="pill-chip" data-prompt="Crie uma calculadora de investimentos e juros compostos com gráficos em SVG interativos e tabela de rendimento mensal.">
+                <i data-lucide="calculator"></i>
+                <span>Calculadora Financeira</span>
+              </button>
+              <button class="pill-chip" data-prompt="Crie uma Landing Page moderna para um aplicativo SaaS com planos de preços, FAQ sanfonado e alternador de tema.">
+                <i data-lucide="rocket"></i>
+                <span>Landing Page SaaS</span>
               </button>
             </div>
           </div>
 
         </div>
 
-        <!-- Barra de Ações Rápidas -->
-        <div class="quick-actions-bar" id="quick-actions-bar">
-          <button class="quick-chip" id="chip-fix">
-            <i data-lucide="wrench"></i>
-            <span>Corrigir código</span>
-          </button>
-          <button class="quick-chip" id="chip-improve">
-            <i data-lucide="sparkles"></i>
-            <span>Melhorar design</span>
-          </button>
-          <button class="quick-chip" id="chip-explain">
-            <i data-lucide="file-question"></i>
-            <span>Explicar código</span>
-          </button>
-        </div>
-
-        <!-- Área de Entrada de Instrução -->
-        <div class="chat-input-area">
-          <form class="prompt-form" id="prompt-form">
-            <div class="textarea-wrapper">
+        <!-- Barra de Entrada Flutuante Moderna (Design Imagens 1, 2 e 3) -->
+        <div class="chat-input-wrapper">
+          <form class="floating-prompt-bar" id="prompt-form">
+            <div class="input-text-container">
               <textarea 
                 id="prompt-input" 
-                rows="3" 
-                placeholder="Descreva a aplicação ou instrua a alteração necessária..."
+                rows="1" 
+                placeholder="Ask anything... Como posso ajudar hoje?"
                 required
               ></textarea>
             </div>
             
-            <div class="input-bottom-bar">
-              <span class="input-hint">Pressione Enter para enviar, Shift+Enter para nova linha</span>
-              
-              <button type="submit" class="btn btn-primary" id="btn-submit">
-                <i data-lucide="send" id="submit-icon"></i>
-                <span id="submit-text">Gerar código</span>
-              </button>
+            <div class="prompt-bar-actions">
+              <div class="prompt-actions-left">
+                <button type="button" class="action-btn-circle" id="chip-fix" title="Corrigir erros no código">
+                  <i data-lucide="wrench"></i>
+                </button>
+                <button type="button" class="action-btn-circle" id="chip-improve" title="Melhorar design">
+                  <i data-lucide="sparkles"></i>
+                </button>
+                <div class="model-select-pill">
+                  <span>nemotron-3-ultra</span>
+                  <i data-lucide="chevron-down"></i>
+                </div>
+              </div>
+
+              <div class="prompt-actions-right">
+                <button type="button" class="action-btn-circle" id="btn-mic-mock" title="Comando de voz">
+                  <i data-lucide="mic"></i>
+                </button>
+                <button type="submit" class="submit-waveform-btn" id="btn-submit" title="Gerar código">
+                  <div class="waveform-icon-wrap" id="submit-icon-wrapper">
+                    <i data-lucide="audio-waveform" id="submit-icon"></i>
+                  </div>
+                  <span class="btn-text-sr" id="submit-text">Gerar</span>
+                </button>
+              </div>
             </div>
           </form>
         </div>
       </section>
 
-      <!-- Painel Direito: Editor Monaco e Preview -->
+      <!-- Painel Direito: Monaco Editor e Preview -->
       <section class="workspace-panel" id="workspace-panel">
         
-        <!-- Barra Superior de Controle do Workspace -->
         <div class="workspace-header">
-          
-          <!-- Seleção de Modo (Código vs Preview) -->
           <div class="view-switcher">
             <button class="view-btn active" id="tab-btn-code" data-view="code">
               <i data-lucide="code"></i>
@@ -173,49 +174,39 @@
             </button>
           </div>
 
-          <!-- Barra de Arquivos Gerados (Tabs) -->
-          <div class="file-tabs-container" id="file-tabs-bar">
-            <!-- Tabs dinâmicas injetadas via JavaScript -->
-          </div>
+          <div class="file-tabs-container" id="file-tabs-bar"></div>
 
-          <!-- Ferramentas de Exportação e Execução -->
           <div class="workspace-tools">
-            <button class="tool-btn" id="btn-copy-code" title="Copiar código do arquivo ativo">
+            <button class="tool-btn" id="btn-copy-code" title="Copiar código">
               <i data-lucide="copy"></i>
               <span>Copiar</span>
             </button>
-            <button class="tool-btn" id="btn-download-file" title="Descarregar arquivo ativo">
+            <button class="tool-btn" id="btn-download-file" title="Descarregar arquivo">
               <i data-lucide="download"></i>
               <span>Arquivo</span>
             </button>
-            <button class="tool-btn" id="btn-download-zip" title="Descarregar projeto completo (ZIP)">
+            <button class="tool-btn" id="btn-download-zip" title="Descarregar ZIP">
               <i data-lucide="archive"></i>
               <span>ZIP</span>
             </button>
-            
             <div class="separator-vertical"></div>
-
             <button class="tool-btn" id="btn-refresh-preview" title="Atualizar Pré-visualização">
               <i data-lucide="rotate-cw"></i>
             </button>
-            <button class="tool-btn" id="btn-open-window" title="Abrir em Nova Janela">
+            <button class="tool-btn" id="btn-open-window" title="Abrir em Nova Aba">
               <i data-lucide="external-link"></i>
             </button>
-            <button class="tool-btn" id="btn-fullscreen-toggle" title="Alternar Ecrã Inteiro">
+            <button class="tool-btn" id="btn-fullscreen-toggle" title="Ecrã Inteiro">
               <i data-lucide="maximize-2"></i>
             </button>
           </div>
         </div>
 
-        <!-- Conteúdo do Workspace: Editor e Preview -->
         <div class="workspace-body">
-          
-          <!-- Container do Monaco Editor -->
           <div class="view-pane active" id="code-view-pane">
             <div id="monaco-container"></div>
           </div>
 
-          <!-- Container do Preview -->
           <div class="view-pane" id="preview-view-pane">
             <div class="preview-responsive-toolbar">
               <div class="device-switcher">
@@ -232,10 +223,9 @@
                   <span>Mobile (375px)</span>
                 </button>
               </div>
-              
               <div class="preview-url-bar">
                 <i data-lucide="lock"></i>
-                <span id="preview-mock-url">https://codeforge-sandbox.local/index.html</span>
+                <span>https://codeforge-sandbox.internal/index.html</span>
               </div>
             </div>
 
@@ -243,18 +233,17 @@
               <iframe 
                 id="preview-iframe" 
                 sandbox="allow-scripts allow-modals allow-forms allow-same-origin" 
-                title="Pré-visualização da Aplicação">
+                title="Pré-visualização">
               </iframe>
             </div>
           </div>
-
         </div>
 
       </section>
 
     </main>
 
-    <!-- Modal de Definições e Ajuda -->
+    <!-- Modal de Definições -->
     <div class="modal-overlay" id="settings-modal">
       <div class="modal-dialog">
         <div class="modal-header">
@@ -269,25 +258,21 @@
 
         <div class="modal-body">
           <div class="info-group">
-            <label>Modelo de Inteligência Artificial Ativo</label>
+            <label>Modelo Primário Ativo</label>
             <input type="text" value="nvidia/nemotron-3-ultra-550b-a55b:free" readonly class="input-readonly">
-            <span class="info-text">Executado exclusivamente via OpenRouter API em modo de alta capacidade.</span>
           </div>
-
           <div class="info-group">
-            <label>Estado da Autenticação</label>
+            <label>Estado da Ligação no Servidor</label>
             <div class="badge-status-box" id="modal-key-status">
               <span class="status-dot"></span>
-              <span id="modal-key-text">A validar chave no servidor...</span>
+              <span id="modal-key-text">A validar conexão...</span>
             </div>
-            <span class="info-text">A chave OPENROUTER_API_KEY deve ser configurada nas variáveis de ambiente do servidor Node.js.</span>
           </div>
-
           <div class="info-group">
-            <label>Histórico e Dados Locais</label>
+            <label>Dados Locais</label>
             <button class="btn btn-danger-outline" id="btn-clear-storage">
               <i data-lucide="trash-2"></i>
-              <span>Limpar projetos guardados localmente</span>
+              <span>Limpar histórico local</span>
             </button>
           </div>
         </div>
@@ -298,12 +283,9 @@
       </div>
     </div>
 
-    <!-- Sistema de Notificações Toast -->
     <div class="toast-container" id="toast-container"></div>
-
   </div>
 
-  <!-- Script Principal -->
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /**
  * CODEFORGE AI — Lógica do Frontend
- * Atualizado com suporte a cold-start e resiliência em nuvem (Render)
+ * Atualizado com Thinking State animado, prevenção de bloqueio de botão e timeout de segurança
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           name: 'index.html',
           language: 'html',
-          content: '<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>CodeForge AI App</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <div class="welcome-box">\n    <h1>CodeForge AI</h1>\n    <p>Pronto no Render. Descreva o que deseja construir no painel à esquerda.</p>\n  </div>\n  <script src="script.js"></script>\n</body>\n</html>'
+          content: '<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>CodeForge AI App</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <div class="welcome-box">\n    <h1>CodeForge AI</h1>\n    <p>Pronto. Descreva a sua aplicação na caixa à esquerda para começar.</p>\n  </div>\n  <script src="script.js"></script>\n</body>\n</html>'
         },
         {
           name: 'style.css',
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chipFix: document.getElementById('chip-fix'),
     chipImprove: document.getElementById('chip-improve'),
-    chipExplain: document.getElementById('chip-explain'),
 
     btnNewProject: document.getElementById('btn-new-project'),
     btnOpenSettings: document.getElementById('btn-open-settings'),
@@ -185,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
           try {
             ${jsFile.content}
           } catch(err) {
-            console.error("Erro no script do Preview:", err);
+            console.error("Erro no Preview:", err);
           }
         </script>
       `;
@@ -248,12 +247,58 @@ document.addEventListener('DOMContentLoaded', () => {
   elements.btnFullscreenToggle.addEventListener('click', () => {
     const workspace = document.getElementById('workspace-panel');
     if (!document.fullscreenElement) {
-      workspace.requestFullscreen().catch(() => showToast('Modo ecrã inteiro bloqueado pelo navegador.', 'error'));
+      workspace.requestFullscreen().catch(() => showToast('Ecrã inteiro bloqueado.', 'error'));
     } else {
       document.exitFullscreen();
     }
   });
 
+  // Indicador de Carregamento Ativo (Thinking State)
+  function createThinkingBubble() {
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble assistant';
+    bubble.id = 'active-thinking-bubble';
+
+    bubble.innerHTML = `
+      <div class="thinking-bubble">
+        <div class="thinking-header">
+          <div class="pulse-dot"></div>
+          <span>A processar com Nemotron 3 Ultra...</span>
+        </div>
+        <div class="thinking-status-text" id="thinking-step-text">A contactar a inteligência artificial...</div>
+      </div>
+    `;
+
+    elements.chatMessages.appendChild(bubble);
+    elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    lucide.createIcons();
+
+    // Atualização dinâmica de etapas para garantir feedback visual
+    let step = 0;
+    const steps = [
+      'A sintetizar componentes e lógica...',
+      'A gerar múltiplos arquivos funcionais...',
+      'A validar integridade do código...'
+    ];
+
+    const interval = setInterval(() => {
+      const stepElem = document.getElementById('thinking-step-text');
+      if (stepElem && step < steps.length) {
+        stepElem.textContent = steps[step];
+        step++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 4500);
+
+    return () => {
+      clearInterval(interval);
+      const elem = document.getElementById('active-thinking-bubble');
+      if (elem) elem.remove();
+    };
+  }
+
+  // Submissão com Resiliência e Prevenção de Bloqueios
   async function submitInstruction(instructionText) {
     if (!instructionText || state.isGenerating) return;
 
@@ -268,6 +313,12 @@ document.addEventListener('DOMContentLoaded', () => {
     state.conversationHistory.push({ role: 'user', content: prompt });
     setGeneratingState(true);
 
+    const removeThinking = createThinkingBubble();
+
+    // AbortController no cliente com 80 segundos
+    const clientController = new AbortController();
+    const clientTimeout = setTimeout(() => clientController.abort(), 80000);
+
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -276,13 +327,21 @@ document.addEventListener('DOMContentLoaded', () => {
           prompt: prompt,
           conversationHistory: state.conversationHistory,
           currentFiles: state.currentProject.files
-        })
+        }),
+        signal: clientController.signal
       });
 
-      const data = await response.json();
+      clearTimeout(clientTimeout);
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error('O servidor respondeu com um formato inesperado. A instância pode estar reiniciando.');
+      }
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Falha ao processar o código no servidor Render.');
+        throw new Error(data.error || 'Falha ao processar instrução.');
       }
 
       state.currentProject = data.project;
@@ -292,6 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
         content: `Projeto: ${data.project.projectName}. Resumo: ${data.project.summary}`
       });
 
+      removeThinking();
       appendMessageToChat('assistant', data.project.summary, data.project.files);
 
       const primaryFile = state.currentProject.files.find(f => f.name === 'index.html') || state.currentProject.files[0];
@@ -305,13 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
       renderFileTabs();
       updatePreview();
       saveStateToStorage();
-      showToast('Código gerado com sucesso.', 'success');
+      showToast('Código gerado e compilado com sucesso.', 'success');
 
     } catch (err) {
+      removeThinking();
       console.error(err);
-      appendMessageToChat('assistant', `Aviso de Erro: ${err.message}`);
-      showToast(err.message, 'error');
+      const errMsg = err.name === 'AbortError' 
+        ? 'A requisição excedeu o tempo limite. O modelo estava sobrecarregado, por favor tente novamente.' 
+        : err.message;
+      
+      appendMessageToChat('assistant', `Aviso: ${errMsg}`);
+      showToast(errMsg, 'error');
     } finally {
+      clearTimeout(clientTimeout);
       setGeneratingState(false);
       elements.promptInput.value = '';
       adjustTextareaHeight();
@@ -324,12 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.promptInput.disabled = generating;
 
     if (generating) {
-      elements.submitText.textContent = 'A gerar...';
       elements.submitIcon.setAttribute('data-lucide', 'loader-2');
       elements.submitIcon.classList.add('spin-animation');
     } else {
-      elements.submitText.textContent = 'Gerar código';
-      elements.submitIcon.setAttribute('data-lucide', 'send');
+      elements.submitIcon.setAttribute('data-lucide', 'audio-waveform');
       elements.submitIcon.classList.remove('spin-animation');
     }
     lucide.createIcons();
@@ -345,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (role === 'assistant') {
       const header = document.createElement('div');
       header.className = 'bubble-header';
-      header.innerHTML = '<i data-lucide="bot"></i><span>CodeForge AI</span>';
+      header.innerHTML = '<i data-lucide="sparkles"></i><span>CodeForge Engine</span>';
       body.appendChild(header);
     }
 
@@ -388,29 +452,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function adjustTextareaHeight() {
     elements.promptInput.style.height = 'auto';
-    elements.promptInput.style.height = Math.min(elements.promptInput.scrollHeight, 180) + 'px';
+    elements.promptInput.style.height = Math.min(elements.promptInput.scrollHeight, 160) + 'px';
   }
 
   elements.promptInput.addEventListener('input', adjustTextareaHeight);
 
-  document.querySelectorAll('.suggestion-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const prompt = card.getAttribute('data-prompt');
+  document.querySelectorAll('.pill-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const prompt = chip.getAttribute('data-prompt');
       elements.promptInput.value = prompt;
       submitInstruction(prompt);
     });
   });
 
   elements.chipFix.addEventListener('click', () => {
-    submitInstruction('Analise o código atual de todos os arquivos, corrija erros e inconsistências mantendo o projeto funcional.');
+    submitInstruction('Analise o código atual de todos os arquivos, corrija erros e inconsistências mantendo o projeto estável.');
   });
 
   elements.chipImprove.addEventListener('click', () => {
-    submitInstruction('Melhore a estética, refinamento visual, tipografia e espaçamentos dos arquivos atuais.');
-  });
-
-  elements.chipExplain.addEventListener('click', () => {
-    submitInstruction('Explique objetivamente a arquitetura do projeto atual e a responsabilidade de cada arquivo.');
+    submitInstruction('Melhore a estética, contraste visual, tipografia e espaçamento dos componentes existentes.');
   });
 
   elements.btnCopyCode.addEventListener('click', async () => {
@@ -464,42 +524,39 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   elements.btnNewProject.addEventListener('click', () => {
-    if (confirm('Deseja iniciar um novo projeto? Todo o progresso não guardado será redefinido.')) {
+    if (confirm('Deseja iniciar um novo projeto? Todo o histórico não guardado será redefinido.')) {
       localStorage.removeItem('codeforge_saved_state');
       window.location.reload();
     }
   });
 
-  // Resiliência de verificação com suporte a Cold Start do Render
   async function checkServerStatus() {
     try {
       const res = await fetch('/api/status');
-      if (!res.ok) throw new Error('Servidor a responder com erro');
+      if (!res.ok) throw new Error();
       const data = await res.json();
 
       if (data.hasApiKey) {
         elements.apiStatusBadge.className = 'status-badge online';
         elements.apiStatusText.textContent = 'Render Conectado';
         elements.modalKeyStatus.style.borderColor = 'var(--accent-green)';
-        elements.modalKeyText.textContent = 'OPENROUTER_API_KEY ativa nas variáveis do Render.';
+        elements.modalKeyText.textContent = 'OPENROUTER_API_KEY ativa no Render.';
       } else {
         elements.apiStatusBadge.className = 'status-badge offline';
         elements.apiStatusText.textContent = 'Chave Ausente';
         elements.modalKeyStatus.style.borderColor = 'var(--accent-amber)';
         elements.modalKeyText.textContent = 'Configure OPENROUTER_API_KEY no painel Environment do Render.';
       }
-    } catch (err) {
-      // Caso a instância gratuita do Render esteja a arrancar (cold start)
-      if (state.serverWakeRetries < 4) {
+    } catch {
+      if (state.serverWakeRetries < 3) {
         state.serverWakeRetries++;
         elements.apiStatusBadge.className = 'status-badge offline';
-        elements.apiStatusText.textContent = 'A acordar servidor Render...';
-        elements.modalKeyText.textContent = 'A instância gratuita do Render está a iniciar (Cold Start). Aguarde alguns segundos...';
-        setTimeout(checkServerStatus, 4000);
+        elements.apiStatusText.textContent = 'A acordar servidor...';
+        elements.modalKeyText.textContent = 'Instância do Render em Cold Start. Aguarde...';
+        setTimeout(checkServerStatus, 3500);
       } else {
         elements.apiStatusBadge.className = 'status-badge offline';
         elements.apiStatusText.textContent = 'Servidor Indisponível';
-        elements.modalKeyText.textContent = 'Não foi possível estabelecer ligação com a instância no Render.';
       }
     }
   }
@@ -509,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
   elements.btnConfirmSettings.addEventListener('click', () => elements.settingsModal.classList.remove('active'));
 
   elements.btnClearStorage.addEventListener('click', () => {
-    if (confirm('Deseja limpar todos os dados e histórico salvos localmente?')) {
+    if (confirm('Deseja limpar todos os dados salvos localmente?')) {
       localStorage.removeItem('codeforge_saved_state');
       showToast('Armazenamento local limpo.', 'info');
       setTimeout(() => window.location.reload(), 600);
