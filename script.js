@@ -1,6 +1,6 @@
 /**
  * CODEFORGE AI — Lógica do Frontend
- * Leitura resiliente de fluxo SSE sem bloqueio por tempo limite do cliente
+ * Atualizado com tratamento resiliente de respostas compiladas e proteção de renderização
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      if (!projectPayload || !projectPayload.files) {
+      if (!projectPayload || !projectPayload.files || projectPayload.files.length === 0) {
         throw new Error('Não foi possível estruturar os arquivos devolvidos.');
       }
 
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderFileTabs();
       updatePreview();
       saveStateToStorage();
-      showToast('Código gerado e compilado com sucesso.', 'success');
+      showToast('Código compilado com sucesso.', 'success');
 
     } catch (err) {
       thinkingUI.remove();
