@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CodeForge AI — Gerador de Código Profissional</title>
+  <title>CodeForge AI — Construtor de Aplicações com IA</title>
   
-  <!-- Fontes Inter & JetBrains Mono -->
+  <!-- Tipografia Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,10 +15,10 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- JSZip -->
+  <!-- JSZip para exportação -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-  <!-- Monaco Editor AMD Loader -->
+  <!-- Monaco Editor -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 </head>
 <body>
@@ -31,7 +31,7 @@
           <div class="brand-icon">
             <i data-lucide="sparkles"></i>
           </div>
-          <span class="brand-name">CodeForge <span>AI</span></span>
+          <span class="brand-name">CodeForge <span>Lovable</span></span>
         </div>
 
         <div class="separator-vertical"></div>
@@ -43,7 +43,7 @@
 
         <div class="model-badge">
           <i data-lucide="cpu"></i>
-          <span>nemotron-3-ultra-550b</span>
+          <span>nemotron-3-ultra</span>
         </div>
       </div>
 
@@ -53,77 +53,69 @@
           <span>Novo Projeto</span>
         </button>
 
-        <button class="btn btn-icon" id="btn-open-settings" title="Definições e Informações">
+        <button class="btn btn-icon" id="btn-open-settings" title="Definições">
           <i data-lucide="sliders"></i>
         </button>
       </div>
     </header>
 
-    <!-- Layout Dividido -->
+    <!-- Layout Principal -->
     <main class="main-layout">
       
-      <!-- Painel Esquerdo: Chat com Design Moderno (Imagens de Referência) -->
+      <!-- Painel Esquerdo: Chat e Histórico -->
       <section class="chat-panel" id="chat-panel">
-        
-        <!-- Glow Ambiente Superior (Referência Orbix AI) -->
         <div class="ambient-glow"></div>
 
-        <!-- Área de Mensagens e Boas-Vindas -->
         <div class="chat-messages" id="chat-messages">
-          
-          <!-- Card de Apresentação Inicial -->
           <div class="welcome-container" id="empty-state">
             <div class="welcome-badge">
-              <i data-lucide="layers"></i>
-              <span>Orbix Engine 2.0</span>
+              <i data-lucide="zap"></i>
+              <span>Lovable Engine 3.0</span>
             </div>
 
-            <h1 class="welcome-title">O que pretende construir hoje?</h1>
-            <p class="welcome-subtitle">O seu assistente de inteligência artificial para planeamento, geração e execução de aplicações completas em tempo real.</p>
+            <h1 class="welcome-title">O que quer criar hoje?</h1>
+            <p class="welcome-subtitle">Descreva a aplicação. O CodeForge criará o código e renderizará o website diretamente no ecrã com Tailwind CSS e componentes funcionais.</p>
             
-            <!-- Card Talk with your AI (Referência Imagem 3) -->
             <div class="feature-card">
               <div class="feature-card-header">
-                <i data-lucide="bot"></i>
+                <i data-lucide="palette"></i>
                 <div>
-                  <h4>Talk with your AI</h4>
-                  <p>Escreva a sua instrução para gerar arquivos completos com Monaco Editor e Live Preview instantâneo.</p>
+                  <h4>Geração Direta de Websites</h4>
+                  <p>Não precisa de programar. A aplicação é montada, estilizada e executada no painel à direita.</p>
                 </div>
               </div>
             </div>
 
-            <!-- Chips de Sugestões Rápidas (Referência Imagens 1 e 3) -->
-            <div class="suggestions-label">Sugestões prontas para iniciar:</div>
+            <div class="suggestions-label">Comece com um clique:</div>
             <div class="suggestions-slider">
-              <button class="pill-chip" data-prompt="Crie um website profissional para uma clínica odontológica com serviços, corpo clínico e formulário de agendamento funcional.">
+              <button class="pill-chip" data-prompt="Crie um website profissional para uma clínica odontológica com serviços, corpo clínico em cartões, marcação de consultas interativa com validação e modo de emergência.">
                 <i data-lucide="activity"></i>
                 <span>Website Clínico</span>
               </button>
-              <button class="pill-chip" data-prompt="Desenvolva um painel Kanban com colunas A Fazer, Em Progresso e Concluído com suporte a arrastar e soltar e localStorage.">
+              <button class="pill-chip" data-prompt="Desenvolva uma plataforma Kanban de produtividade com colunas dinâmicas, modal de nova tarefa, etiquetas coloridas e persistência no localStorage.">
                 <i data-lucide="kanban"></i>
-                <span>Quadro Kanban</span>
+                <span>Quadro Kanban SaaS</span>
               </button>
-              <button class="pill-chip" data-prompt="Crie uma calculadora de investimentos e juros compostos com gráficos em SVG interativos e tabela de rendimento mensal.">
+              <button class="pill-chip" data-prompt="Crie uma calculadora de investimentos e amortização com gráficos SVG interativos, tabela de juros compostos e exportação de dados.">
                 <i data-lucide="calculator"></i>
                 <span>Calculadora Financeira</span>
               </button>
-              <button class="pill-chip" data-prompt="Crie uma Landing Page moderna para um aplicativo SaaS com planos de preços, FAQ sanfonado e alternador de tema.">
+              <button class="pill-chip" data-prompt="Crie uma Landing Page moderna com Hero Section de alto impacto, tabela de preços mensal/anual interativa, FAQ em sanfona e formulário de contacto.">
                 <i data-lucide="rocket"></i>
                 <span>Landing Page SaaS</span>
               </button>
             </div>
           </div>
-
         </div>
 
-        <!-- Barra de Entrada Flutuante Moderna (Design Imagens 1, 2 e 3) -->
+        <!-- Barra Flutuante de Instruções -->
         <div class="chat-input-wrapper">
           <form class="floating-prompt-bar" id="prompt-form">
             <div class="input-text-container">
               <textarea 
                 id="prompt-input" 
                 rows="1" 
-                placeholder="Ask anything... Como posso ajudar hoje?"
+                placeholder="Descreva o site ou aplicação que deseja criar..."
                 required
               ></textarea>
             </div>
@@ -133,24 +125,21 @@
                 <button type="button" class="action-btn-circle" id="chip-fix" title="Corrigir erros no código">
                   <i data-lucide="wrench"></i>
                 </button>
-                <button type="button" class="action-btn-circle" id="chip-improve" title="Melhorar design">
+                <button type="button" class="action-btn-circle" id="chip-improve" title="Aprimorar design visual">
                   <i data-lucide="sparkles"></i>
                 </button>
                 <div class="model-select-pill">
-                  <span>nemotron-3-ultra</span>
-                  <i data-lucide="chevron-down"></i>
+                  <span>Tailwind + JS Ativo</span>
+                  <i data-lucide="check"></i>
                 </div>
               </div>
 
               <div class="prompt-actions-right">
-                <button type="button" class="action-btn-circle" id="btn-mic-mock" title="Comando de voz">
-                  <i data-lucide="mic"></i>
-                </button>
-                <button type="submit" class="submit-waveform-btn" id="btn-submit" title="Gerar código">
+                <button type="submit" class="submit-waveform-btn" id="btn-submit" title="Construir Aplicação">
                   <div class="waveform-icon-wrap" id="submit-icon-wrapper">
-                    <i data-lucide="audio-waveform" id="submit-icon"></i>
+                    <i data-lucide="play" id="submit-icon"></i>
                   </div>
-                  <span class="btn-text-sr" id="submit-text">Gerar</span>
+                  <span class="btn-text-sr">Gerar</span>
                 </button>
               </div>
             </div>
@@ -158,19 +147,20 @@
         </div>
       </section>
 
-      <!-- Painel Direito: Monaco Editor e Preview -->
+      <!-- Painel Direito: O Palco da Aplicação (Preview em Primeiro Lugar) -->
       <section class="workspace-panel" id="workspace-panel">
         
         <div class="workspace-header">
+          <!-- Separador Estilo Lovable (Preview é o Padrão) -->
           <div class="view-switcher">
-            <button class="view-btn active" id="tab-btn-code" data-view="code">
+            <button class="view-btn active" id="tab-btn-preview" data-view="preview">
+              <i data-lucide="monitor"></i>
+              <span>Live Preview</span>
+              <span class="preview-indicator" id="preview-update-dot"></span>
+            </button>
+            <button class="view-btn" id="tab-btn-code" data-view="code">
               <i data-lucide="code"></i>
               <span>Código</span>
-            </button>
-            <button class="view-btn" id="tab-btn-preview" data-view="preview">
-              <i data-lucide="play"></i>
-              <span>Preview</span>
-              <span class="preview-indicator" id="preview-update-dot"></span>
             </button>
           </div>
 
@@ -181,37 +171,34 @@
               <i data-lucide="copy"></i>
               <span>Copiar</span>
             </button>
-            <button class="tool-btn" id="btn-download-file" title="Descarregar arquivo">
+            <button class="tool-btn" id="btn-download-file" title="Descarregar ficheiro">
               <i data-lucide="download"></i>
-              <span>Arquivo</span>
+              <span>Ficheiro</span>
             </button>
-            <button class="tool-btn" id="btn-download-zip" title="Descarregar ZIP">
+            <button class="tool-btn" id="btn-download-zip" title="Descarregar ZIP completo">
               <i data-lucide="archive"></i>
               <span>ZIP</span>
             </button>
             <div class="separator-vertical"></div>
-            <button class="tool-btn" id="btn-refresh-preview" title="Atualizar Pré-visualização">
+            <button class="tool-btn" id="btn-refresh-preview" title="Recarregar aplicação">
               <i data-lucide="rotate-cw"></i>
             </button>
-            <button class="tool-btn" id="btn-open-window" title="Abrir em Nova Aba">
+            <button class="tool-btn" id="btn-open-window" title="Abrir website numa nova janela">
               <i data-lucide="external-link"></i>
             </button>
-            <button class="tool-btn" id="btn-fullscreen-toggle" title="Ecrã Inteiro">
+            <button class="tool-btn" id="btn-fullscreen-toggle" title="Ecrã inteiro">
               <i data-lucide="maximize-2"></i>
             </button>
           </div>
         </div>
 
         <div class="workspace-body">
-          <div class="view-pane active" id="code-view-pane">
-            <div id="monaco-container"></div>
-          </div>
-
-          <div class="view-pane" id="preview-view-pane">
+          <!-- Live Preview Sandbox (Hero View) -->
+          <div class="view-pane active" id="preview-view-pane">
             <div class="preview-responsive-toolbar">
               <div class="device-switcher">
                 <button class="device-btn active" data-width="100%">
-                  <i data-lucide="monitor"></i>
+                  <i data-lucide="laptop"></i>
                   <span>Desktop</span>
                 </button>
                 <button class="device-btn" data-width="768px">
@@ -225,7 +212,7 @@
               </div>
               <div class="preview-url-bar">
                 <i data-lucide="lock"></i>
-                <span>https://codeforge-sandbox.internal/index.html</span>
+                <span id="preview-url-text">https://meu-website.codeforge.app</span>
               </div>
             </div>
 
@@ -233,9 +220,14 @@
               <iframe 
                 id="preview-iframe" 
                 sandbox="allow-scripts allow-modals allow-forms allow-same-origin" 
-                title="Pré-visualização">
+                title="Website Renderizado">
               </iframe>
             </div>
+          </div>
+
+          <!-- Editor Monaco (Secundário) -->
+          <div class="view-pane" id="code-view-pane">
+            <div id="monaco-container"></div>
           </div>
         </div>
 
@@ -258,21 +250,21 @@
 
         <div class="modal-body">
           <div class="info-group">
-            <label>Modelo Primário Ativo</label>
+            <label>Modelo Ativo</label>
             <input type="text" value="nvidia/nemotron-3-ultra-550b-a55b:free" readonly class="input-readonly">
           </div>
           <div class="info-group">
-            <label>Estado da Ligação no Servidor</label>
+            <label>Ligação ao Servidor</label>
             <div class="badge-status-box" id="modal-key-status">
               <span class="status-dot"></span>
               <span id="modal-key-text">A validar conexão...</span>
             </div>
           </div>
           <div class="info-group">
-            <label>Dados Locais</label>
+            <label>Armazenamento Local</label>
             <button class="btn btn-danger-outline" id="btn-clear-storage">
               <i data-lucide="trash-2"></i>
-              <span>Limpar histórico local</span>
+              <span>Limpar histórico de projetos</span>
             </button>
           </div>
         </div>

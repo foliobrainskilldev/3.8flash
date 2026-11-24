@@ -35,7 +35,6 @@ app.use((req, res, next) => {
 
 app.use(express.static(__dirname));
 
-// Health check para o Render
 app.get('/healthz', (req, res) => {
   res.status(200).json({ status: 'healthy', uptime: Math.floor(process.uptime()) });
 });
@@ -49,7 +48,7 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// Higienizador de strings JSON com quebras de linha literais emitidas por LLMs
+// Higienizador resiliente de strings JSON
 function sanitizeJSONString(str) {
   let result = '';
   let inString = false;
@@ -57,37 +56,27 @@ function sanitizeJSONString(str) {
 
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
-
     if (escape) {
       result += char;
       escape = false;
       continue;
     }
-
     if (char === '\\') {
       escape = true;
       result += char;
       continue;
     }
-
     if (char === '"') {
       inString = !inString;
       result += char;
       continue;
     }
-
     if (inString) {
-      if (char === '\n') {
-        result += '\\n';
-      } else if (char === '\r') {
-        result += '\\r';
-      } else if (char === '\t') {
-        result += '\\t';
-      } else if (char.charCodeAt(0) < 32) {
-        result += ' ';
-      } else {
-        result += char;
-      }
+      if (char === '\n') result += '\\n';
+      else if (char === '\r') result += '\\r';
+      else if (char === '\t') result += '\\t';
+      else if (char.charCodeAt(0) < 32) result += ' ';
+      else result += char;
     } else {
       result += char;
     }
@@ -95,7 +84,7 @@ function sanitizeJSONString(str) {
   return result;
 }
 
-// Extrator resiliente de arquivos em 6 camadas
+// Extrator resiliente em múltiplas camadas no padrão Lovable
 function extractProjectFiles(rawText) {
   if (!rawText || typeof rawText !== 'string' || rawText.trim().length === 0) {
     throw new Error('A resposta devolvida pela IA está vazia.');
@@ -103,7 +92,7 @@ function extractProjectFiles(rawText) {
 
   const cleaned = rawText.trim();
 
-  // ESTRATÉGIA 1: Parsing JSON Direto (se a IA enviou JSON perfeito)
+  // 1. Parsing JSON Direto
   try {
     let directCandidate = cleaned;
     const jsonMatch = directCandidate.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
@@ -119,7 +108,7 @@ function extractProjectFiles(rawText) {
     }
   } catch {}
 
-  // ESTRATÉGIA 2: Parsing JSON com Higienização de Linhas/Aspas
+  // 2. Parsing JSON Higienizado
   try {
     let candidate = cleaned;
     const firstBrace = candidate.indexOf('{');
@@ -134,71 +123,7 @@ function extractProjectFiles(rawText) {
     }
   } catch {}
 
-  // ESTRATÉGIA 3: Extração Regex de Campos de Arquivo de JSON Truncado
-  try {
-    const fileEntries = [];
-    const nameRegex = /"name"\s*:\s*"([^"]+)"/g;
-    let nameMatch;
-    
-    while ((nameMatch = nameRegex.exec(cleaned)) !== null) {
-      const fileName = nameMatch[1];
-      const startIndex = nameMatch.index;
-      const contentKeyIndex = cleaned.indexOf('"content"', startIndex);
-
-      if (contentKeyIndex !== -1 && contentKeyIndex - startIndex < 300) {
-        const colonIndex = cleaned.indexOf(':', contentKeyIndex);
-        const quoteStartIndex = cleaned.indexOf('"', colonIndex);
-        
-        if (quoteStartIndex !== -1) {
-          let contentValue = '';
-          let i = quoteStartIndex + 1;
-          let isEscaped = false;
-
-          while (i < cleaned.length) {
-            const c = cleaned[i];
-            if (isEscaped) {
-              if (c === 'n') contentValue += '\n';
-              else if (c === 'r') contentValue += '\r';
-              else if (c === 't') contentValue += '\t';
-              else contentValue += c;
-              isEscaped = false;
-            } else if (c === '\\') {
-              isEscaped = true;
-            } else if (c === '"') {
-              const lookAhead = cleaned.substring(i + 1, i + 30).trim();
-              if (lookAhead.startsWith(',') || lookAhead.startsWith('}') || lookAhead.startsWith(']')) {
-                break;
-              } else {
-                contentValue += c;
-              }
-            } else {
-              contentValue += c;
-            }
-            i++;
-          }
-
-          if (contentValue.trim().length > 0) {
-            fileEntries.push({
-              name: fileName,
-              language: fileName.endsWith('.html') ? 'html' : (fileName.endsWith('.css') ? 'css' : 'javascript'),
-              content: contentValue.trim()
-            });
-          }
-        }
-      }
-    }
-
-    if (fileEntries.length > 0) {
-      return {
-        projectName: 'Aplicação Web',
-        description: 'Gerado a partir do código estruturado',
-        summary: 'Arquivos gerados e recuperados com sucesso.',
-        files: fileEntries
-      };
-    }
-  } catch {}
-
-  // ESTRATÉGIA 4: Delimitadores Explícitos (### FILE: nome.ext ou [Arquivo: nome.ext])
+  // 3. Extração por Delimitadores de Arquivo (### FILE: nome.ext)
   const filesFromDelimiters = [];
   const delimiterRegex = /(?:###\s*FILE:?|===\s*FILE:?|\[Arquivo:?)\s*([a-zA-Z0-9._-]+)[^\n]*\n([\s\S]*?)(?=(?:###\s*FILE:?|===\s*FILE:?|\[Arquivo:?)|$)/gi;
   let delMatch;
@@ -219,14 +144,14 @@ function extractProjectFiles(rawText) {
 
   if (filesFromDelimiters.length > 0) {
     return {
-      projectName: 'Aplicação Web',
-      description: 'Gerado via delimitadores de arquivos',
-      summary: 'Arquivos compilados com sucesso.',
+      projectName: 'Aplicação Web Lovable',
+      description: 'Aplicação gerada com Tailwind CSS e JavaScript interativo',
+      summary: 'Aplicação construída e pronta para execução.',
       files: filesFromDelimiters
     };
   }
 
-  // ESTRATÉGIA 5: Extração por Blocos de Código Markdown
+  // 4. Sniffer de Blocos de Código Markdown
   const filesFromBlocks = [];
   const blockRegex = /```(html|css|javascript|js)?\s*(?:<!--\s*([a-zA-Z0-9._-]+)\s*-->|\/\*\s*([a-zA-Z0-9._-]+)\s*\*\/)?\s*([\s\S]*?)```/gi;
   let bMatch;
@@ -253,115 +178,82 @@ function extractProjectFiles(rawText) {
 
   if (filesFromBlocks.length > 0) {
     return {
-      projectName: 'Aplicação Web',
-      description: 'Gerado por blocos markdown',
-      summary: 'Código compilado com sucesso.',
+      projectName: 'Aplicação Web Lovable',
+      description: 'Aplicação completa extraída com sucesso',
+      summary: 'Arquivos compilados e renderizados no preview.',
       files: filesFromBlocks
     };
   }
 
-  // ESTRATÉGIA 6: Garantia Absoluta (Detecção de Código HTML/CSS/JS Bruto)
-  const fallbackFiles = [];
-  if (cleaned.includes('<html') || cleaned.includes('<!DOCTYPE') || cleaned.includes('<body')) {
-    fallbackFiles.push({
-      name: 'index.html',
-      language: 'html',
-      content: cleaned
-    });
-    fallbackFiles.push({
-      name: 'style.css',
-      language: 'css',
-      content: '/* Estilos embutidos no HTML ou gerados pelo template */\nbody { font-family: sans-serif; }'
-    });
-    fallbackFiles.push({
-      name: 'script.js',
-      language: 'javascript',
-      content: '// Scripts funcionais integrados'
-    });
-
-    return {
-      projectName: 'Aplicação Web',
-      description: 'Aplicação recuperada do código direto',
-      summary: 'Código HTML identificado e compilado.',
-      files: fallbackFiles
-    };
-  }
-
-  // Se for texto explicativo, empacota num HTML limpo para visualização imediata
+  // 5. Garantia Final: Código HTML direto transformado em app
   return {
     projectName: 'Aplicação Web',
-    description: 'Resultado do assistente',
-    summary: 'Instrução processada com sucesso.',
+    description: 'Interface web gerada',
+    summary: 'Interface web estruturada e renderizada.',
     files: [
       {
         name: 'index.html',
         language: 'html',
-        content: `<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>CodeForge AI</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <div class="content-wrapper">\n    ${cleaned.replace(/\n/g, '<br>')}\n  </div>\n</body>\n</html>`
+        content: cleaned.includes('<html') ? cleaned : `<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <script src="https://cdn.tailwindcss.com"></script>\n  <script src="https://unpkg.com/lucide@latest"></script>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body class="bg-slate-50 text-slate-900">\n  ${cleaned}\n  <script src="script.js"></script>\n</body>\n</html>`
       },
       {
         name: 'style.css',
         language: 'css',
-        content: 'body { font-family: system-ui, sans-serif; padding: 2rem; background: #F8FAFC; color: #0F172A; line-height: 1.6; }\n.content-wrapper { background: #FFFFFF; padding: 2rem; border-radius: 12px; border: 1px solid #E2E8F0; max-width: 800px; margin: auto; }'
+        content: '@layer utilities {\n  .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }\n}'
       },
       {
         name: 'script.js',
         language: 'javascript',
-        content: '// Código inicial'
+        content: 'document.addEventListener("DOMContentLoaded", () => { if (window.lucide) lucide.createIcons(); });'
       }
     ]
   };
 }
 
-const SYSTEM_PROMPT = `Você é o CodeForge AI, um engenheiro de software autônomo de nível sênior.
-Sua missão é gerar aplicações completas, funcionais e modernas em HTML, CSS e JavaScript.
+// Prompt de Sistema Inspirado no Lovable.dev
+const SYSTEM_PROMPT = `Você é o Lovable AI Engine do CodeForge, um arquiteto e designer de software frontend de classe mundial.
+Sua missão é gerar APLICAÇÕES WEB COMPLETAS, INTERATIVAS E MODERNAS que sejam renderizadas diretamente na tela como um produto real.
 
-Você DEVE estruturar sua resposta preferencialmente no seguinte formato JSON:
+PADRÃO VISUAL E TECNOLÓGICO OBRIGATÓRIO (ESTILO LOVABLE):
+1. Use SEMPRE Tailwind CSS via CDN (<script src="https://cdn.tailwindcss.com"></script>) no cabeçalho do index.html.
+2. Use ícones SVG via Lucide (<script src="https://unpkg.com/lucide@latest"></script>) com tags <i data-lucide="..."></i> em botões, menus e cartões.
+3. Adicione a fonte Inter do Google Fonts para uma tipografia moderna e elegante.
+4. O design DEVE ser rico e com acabamento de produto real: sombras suaves (shadow-sm, shadow-xl), cantos arredondados (rounded-2xl, rounded-xl), gradientes subtis, bordas discretas (border-slate-200) e alternância de cores elegante (ex: slate-900 com azul #2563EB ou esmeralda #059669).
+5. O JavaScript em 'script.js' DEVE ser 100% funcional e interativo: modais que abrem e fecham, formulários com validação e feedback visual na tela (toasts ou alertas inline), filtros de pesquisa funcionais, agendamentos salvos no localStorage.
+
+FORMATO DE RESPOSTA (JSON OU DELIMITADORES DE ARQUIVO):
+Você pode responder em JSON estruturado:
 {
-  "projectName": "Nome do Projeto",
-  "description": "Descrição sucinta",
-  "summary": "Resumo das funcionalidades criadas",
+  "projectName": "Nome da Aplicação",
+  "description": "Descrição",
+  "summary": "Resumo das funcionalidades",
   "files": [
-    {
-      "name": "index.html",
-      "language": "html",
-      "content": "<!DOCTYPE html>..."
-    },
-    {
-      "name": "style.css",
-      "language": "css",
-      "content": "/* estilos */"
-    },
-    {
-      "name": "script.js",
-      "language": "javascript",
-      "content": "// lógica"
-    }
+    { "name": "index.html", "language": "html", "content": "<!DOCTYPE html>..." },
+    { "name": "style.css", "language": "css", "content": "/* animações */" },
+    { "name": "script.js", "language": "javascript", "content": "// interações" }
   ]
 }
 
-Se preferir ou se o código for extenso, você também pode usar delimitadores claros como:
+Ou usando delimitadores:
 ### FILE: index.html
 \`\`\`html
-<!DOCTYPE html>
-...
+<!DOCTYPE html>...
 \`\`\`
 
 ### FILE: style.css
 \`\`\`css
-...
+/* estilos */
 \`\`\`
 
 ### FILE: script.js
 \`\`\`javascript
-...
+// lógica
 \`\`\`
 
-REGRAS:
-1. NÃO utilize emojis em nenhuma parte do código ou textos.
-2. Não use placeholders como "TODO" ou comentários de código incompleto.
-3. Garanta que o formulário de marcação e os botões tenham comportamentos funcionais com JavaScript.`;
+REGRAS RÍGIDAS:
+- Não utilize emojis em nenhuma parte.
+- Nunca devolva código incompleto ou placeholders como "// adicione aqui". Escreva todo o código necessário para o site funcionar de imediato.`;
 
-// Endpoint com Streaming SSE e Resiliência Total
 app.post('/api/generate', async (req, res) => {
   const { prompt, conversationHistory = [], currentFiles = [] } = req.body;
 
@@ -372,7 +264,7 @@ app.post('/api/generate', async (req, res) => {
   const activeApiKey = OPENROUTER_API_KEY.trim();
   if (!activeApiKey) {
     return res.status(500).json({
-      error: 'A chave OPENROUTER_API_KEY não está configurada no painel Environment do Render.'
+      error: 'A chave OPENROUTER_API_KEY não está configurada no Render.'
     });
   }
 
@@ -389,12 +281,10 @@ app.post('/api/generate', async (req, res) => {
   };
 
   const heartbeatInterval = setInterval(() => {
-    if (!res.writableEnded) {
-      res.write(':\n\n');
-    }
+    if (!res.writableEnded) res.write(':\n\n');
   }, 8000);
 
-  sendEvent('status', { message: 'A conectar à OpenRouter (Nemotron 3 Ultra)...' });
+  sendEvent('status', { message: 'A contactar Lovable Engine (Nemotron 3 Ultra)...' });
 
   const controller = new AbortController();
   const apiTimeout = setTimeout(() => controller.abort(), 180000);
@@ -402,9 +292,7 @@ app.post('/api/generate', async (req, res) => {
   res.on('close', () => {
     clearTimeout(apiTimeout);
     clearInterval(heartbeatInterval);
-    if (!res.writableEnded) {
-      controller.abort();
-    }
+    if (!res.writableEnded) controller.abort();
   });
 
   try {
@@ -427,7 +315,7 @@ app.post('/api/generate', async (req, res) => {
       for (const f of currentFiles) {
         contextualPrompt += `\n[${f.name}]\n${f.content}\n`;
       }
-      contextualPrompt += '\n--- FIM DO CÓDIGO ATUAL ---\nAtualize preservando estabilidade e retorne todos os arquivos completos.';
+      contextualPrompt += '\n--- FIM DO CÓDIGO ATUAL ---\nAtualize preservando as funcionalidades existentes e retorne o código completo.';
     }
 
     messages.push({ role: 'user', content: contextualPrompt });
@@ -439,14 +327,14 @@ app.post('/api/generate', async (req, res) => {
       headers: {
         'Authorization': `Bearer ${activeApiKey}`,
         'HTTP-Referer': siteUrl,
-        'X-Title': 'CodeForge AI Platform',
+        'X-Title': 'CodeForge Lovable Platform',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: PRIMARY_MODEL,
         models: FALLBACK_MODELS,
         messages: messages,
-        temperature: 0.2,
+        temperature: 0.25,
         max_tokens: 8192,
         stream: true
       }),
@@ -455,17 +343,13 @@ app.post('/api/generate', async (req, res) => {
 
     if (!openRouterResponse.ok) {
       const errText = await openRouterResponse.text();
-      let errorMsg = `Erro na OpenRouter (${openRouterResponse.status})`;
-      if (openRouterResponse.status === 401) errorMsg = 'Chave OPENROUTER_API_KEY inválida.';
-      if (openRouterResponse.status === 429) errorMsg = 'Limite de taxa excedido na OpenRouter. Aguarde alguns instantes.';
-
       clearInterval(heartbeatInterval);
       clearTimeout(apiTimeout);
-      sendEvent('error', { error: errorMsg, details: errText });
+      sendEvent('error', { error: `Erro na OpenRouter (${openRouterResponse.status})`, details: errText });
       return res.end();
     }
 
-    sendEvent('status', { message: 'A sintetizar código e componentes funcionais...' });
+    sendEvent('status', { message: 'A projetar componentes Tailwind CSS e interações...' });
 
     let fullAccumulatedText = '';
     let lastProgressUpdate = 0;
@@ -505,7 +389,7 @@ app.post('/api/generate', async (req, res) => {
     clearInterval(heartbeatInterval);
     clearTimeout(apiTimeout);
 
-    sendEvent('status', { message: 'A compilar arquivos e montar o preview...' });
+    sendEvent('status', { message: 'A renderizar website no ecossistema Preview...' });
 
     const project = extractProjectFiles(fullAccumulatedText);
     sendEvent('complete', { project });
@@ -514,13 +398,9 @@ app.post('/api/generate', async (req, res) => {
   } catch (err) {
     clearInterval(heartbeatInterval);
     clearTimeout(apiTimeout);
-
     console.error('[Streaming Error]', err);
     if (!res.writableEnded) {
-      const msg = err.name === 'AbortError'
-        ? 'A requisição atingiu o tempo limite. Tente uma instrução mais objetiva.'
-        : (err.message || 'Erro durante a compilação do código.');
-      sendEvent('error', { error: msg });
+      sendEvent('error', { error: err.name === 'AbortError' ? 'Tempo limite atingido.' : err.message });
       res.end();
     }
   }
@@ -531,7 +411,7 @@ app.get('*', (req, res) => {
 });
 
 const server = app.listen(PORT, HOST, () => {
-  console.log(`[CodeForge AI] Rodando em http://${HOST}:${PORT}`);
+  console.log(`[Lovable Engine] CodeForge AI em http://${HOST}:${PORT}`);
 });
 
 process.on('SIGTERM', () => server.close(() => process.exit(0)));

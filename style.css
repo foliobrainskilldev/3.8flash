@@ -1,17 +1,17 @@
 /* ==========================================================================
-   CODEFORGE AI — Design Inspirado nos Modelos Orbix AI & Modern Assistant
-   Minimalismo, Fundo Branco, Brilho Ambiente Suave, Pílulas Flutuantes
+   CODEFORGE AI — Design System Estilo Lovable.dev
+   Foco em Visual-First: Moldura de Navegador, Brilho Ambiente e UI Minimalista
    ========================================================================== */
 
 :root {
   --bg-main: #FFFFFF;
   --bg-subtle: #F8FAFC;
   --bg-card: #FFFFFF;
-  --bg-input: #F8FAFC;
+  --bg-canvas: #0F172A;
   
   --border-color: #E2E8F0;
   --border-subtle: #CBD5E1;
-  --border-focus: #3B82F6;
+  --border-focus: #2563EB;
 
   --text-main: #0F172A;
   --text-secondary: #475569;
@@ -20,21 +20,24 @@
 
   --accent-blue: #2563EB;
   --accent-blue-hover: #1D4ED8;
-  --accent-coral: #E11D48;
-  --accent-coral-glow: rgba(225, 29, 72, 0.12);
+  --accent-blue-subtle: #EFF6FF;
 
+  --accent-coral: #E11D48;
   --accent-green: #059669;
+  --accent-green-subtle: #ECFDF5;
   --accent-amber: #D97706;
   --accent-red: #DC2626;
 
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-lg: 16px;
   --radius-pill: 9999px;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
-  --shadow-float: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-float: 0 12px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+  --shadow-browser: 0 20px 40px -8px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.05);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -54,6 +57,7 @@ body {
   height: 100vh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app-container {
@@ -64,7 +68,9 @@ body {
   overflow: hidden;
 }
 
-/* Header */
+/* ==========================================================================
+   Header Superior
+   ========================================================================== */
 .app-header {
   height: var(--header-height);
   border-bottom: 1px solid var(--border-color);
@@ -85,7 +91,7 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
   cursor: pointer;
 }
 
@@ -94,11 +100,11 @@ body {
   color: #FFFFFF;
   width: 32px;
   height: 32px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
 .brand-icon i {
@@ -114,6 +120,7 @@ body {
 
 .brand-name span {
   color: var(--accent-blue);
+  font-weight: 800;
 }
 
 .separator-vertical {
@@ -126,7 +133,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.3rem 0.65rem;
+  padding: 0.28rem 0.65rem;
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-pill);
@@ -144,7 +151,7 @@ body {
 
 .status-badge.online .status-dot {
   background-color: var(--accent-green);
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+  box-shadow: 0 0 0 2px var(--accent-green-subtle);
 }
 
 .status-badge.offline .status-dot {
@@ -170,7 +177,9 @@ body {
   height: 13px;
 }
 
-/* Layout Principal */
+/* ==========================================================================
+   Layout Principal
+   ========================================================================== */
 .main-layout {
   display: grid;
   grid-template-columns: 440px 1fr;
@@ -179,7 +188,9 @@ body {
   overflow: hidden;
 }
 
-/* Painel Esquerdo */
+/* ==========================================================================
+   Painel Esquerdo (Chat Lovable)
+   ========================================================================== */
 .chat-panel {
   position: relative;
   border-right: 1px solid var(--border-color);
@@ -195,8 +206,8 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 220px;
-  background: radial-gradient(ellipse at 50% -20%, rgba(225, 29, 72, 0.12), rgba(255, 255, 255, 0) 70%);
+  height: 240px;
+  background: radial-gradient(ellipse at 50% -15%, rgba(37, 99, 235, 0.1), rgba(255, 255, 255, 0) 70%);
   pointer-events: none;
   z-index: 1;
 }
@@ -208,32 +219,32 @@ body {
   padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.15rem;
   z-index: 2;
 }
 
-/* Welcome Container */
+/* Hero de Entrada */
 .welcome-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   margin: auto 0;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
 }
 
 .welcome-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background-color: rgba(225, 29, 72, 0.08);
-  border: 1px solid rgba(225, 29, 72, 0.2);
-  color: var(--accent-coral);
+  background-color: var(--accent-blue-subtle);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: var(--accent-blue);
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.3rem 0.75rem;
+  padding: 0.28rem 0.75rem;
   border-radius: var(--radius-pill);
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
 
 .welcome-badge i {
@@ -242,20 +253,20 @@ body {
 }
 
 .welcome-title {
-  font-size: 1.45rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--text-main);
-  letter-spacing: -0.025em;
-  line-height: 1.3;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
   margin-bottom: 0.6rem;
 }
 
 .welcome-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
   max-width: 360px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.4rem;
 }
 
 .feature-card {
@@ -266,7 +277,7 @@ body {
   padding: 1rem;
   text-align: left;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.4rem;
 }
 
 .feature-card-header {
@@ -276,8 +287,8 @@ body {
 }
 
 .feature-card-header i {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: var(--accent-blue);
   margin-top: 2px;
 }
@@ -301,6 +312,8 @@ body {
   font-weight: 600;
   color: var(--text-muted);
   margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .suggestions-slider {
@@ -339,7 +352,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-/* Bolhas de Mensagem */
+/* Mensagens de Chat */
 .message-bubble {
   display: flex;
   flex-direction: column;
@@ -392,7 +405,7 @@ body {
   color: var(--text-muted);
   margin-bottom: 0.45rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 .bubble-header i {
@@ -417,7 +430,7 @@ body {
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-color);
   padding: 0.25rem 0.55rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   font-size: 0.74rem;
   font-family: var(--font-mono);
   color: var(--text-secondary);
@@ -428,7 +441,7 @@ body {
   height: 12px;
 }
 
-/* Thinking State com Badge Dinâmico de Progresso */
+/* Thinking State com Badge em Tempo Real */
 .thinking-bubble {
   background-color: #FFFFFF;
   border: 1px solid var(--border-color);
@@ -456,7 +469,7 @@ body {
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  padding: 0.15rem 0.5rem;
+  padding: 0.15rem 0.55rem;
   border-radius: var(--radius-pill);
 }
 
@@ -478,10 +491,12 @@ body {
   color: var(--text-secondary);
 }
 
-/* Barra Flutuante de Prompt */
+/* ==========================================================================
+   Barra Flutuante de Prompt (Floating Prompt Bar)
+   ========================================================================== */
 .chat-input-wrapper {
   padding: 0 1.25rem 1.25rem 1.25rem;
-  background: linear-gradient(to top, #FFFFFF 75%, rgba(255, 255, 255, 0));
+  background: linear-gradient(to top, #FFFFFF 80%, rgba(255, 255, 255, 0));
   z-index: 10;
 }
 
@@ -499,7 +514,7 @@ body {
 
 .floating-prompt-bar:focus-within {
   border-color: var(--accent-blue);
-  box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.12), 0 0 0 1px var(--accent-blue);
+  box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.15), 0 0 0 1px var(--accent-blue);
 }
 
 .input-text-container textarea {
@@ -560,18 +575,19 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.6rem;
-  background-color: var(--bg-subtle);
-  border: 1px solid var(--border-color);
+  padding: 0.25rem 0.65rem;
+  background-color: var(--accent-green-subtle);
+  border: 1px solid rgba(5, 150, 105, 0.2);
   border-radius: var(--radius-pill);
   font-size: 0.72rem;
   font-family: var(--font-mono);
-  color: var(--text-secondary);
+  color: var(--accent-green);
+  font-weight: 600;
 }
 
 .model-select-pill i {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
 }
 
 .submit-waveform-btn {
@@ -579,19 +595,19 @@ body {
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #E11D48, #BE123C);
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
   color: #FFFFFF;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
 .submit-waveform-btn:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 6px 14px rgba(225, 29, 72, 0.4);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
 }
 
 .submit-waveform-btn:disabled {
@@ -601,8 +617,8 @@ body {
 }
 
 .waveform-icon-wrap i {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
 }
 
 .btn-text-sr {
@@ -618,17 +634,19 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Workspace e Editor */
+/* ==========================================================================
+   Workspace Direito (Visual-First Preview & Monaco Editor)
+   ========================================================================== */
 .workspace-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background-color: var(--bg-main);
+  background-color: #F8FAFC;
 }
 
 .workspace-header {
-  height: 44px;
+  height: 46px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -636,6 +654,7 @@ body {
   padding: 0 0.85rem;
   background-color: var(--bg-main);
   gap: 0.75rem;
+  z-index: 10;
 }
 
 .view-switcher {
@@ -651,19 +670,21 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.24rem 0.65rem;
-  border-radius: 6px;
+  padding: 0.26rem 0.75rem;
+  border-radius: var(--radius-xs);
   border: none;
   background: transparent;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
 }
 
 .view-btn i {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 
 .view-btn.active {
@@ -693,13 +714,14 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.28rem 0.65rem;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   border: 1px solid transparent;
   background-color: transparent;
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.76rem;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .file-tab i {
@@ -715,7 +737,7 @@ body {
   background-color: var(--bg-subtle);
   border-color: var(--border-color);
   color: var(--accent-blue);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .workspace-tools {
@@ -729,13 +751,14 @@ body {
   align-items: center;
   gap: 0.35rem;
   padding: 0.3rem 0.55rem;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   border: 1px solid var(--border-color);
   background-color: var(--bg-main);
   color: var(--text-secondary);
   font-size: 0.76rem;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .tool-btn i {
@@ -751,7 +774,7 @@ body {
 .workspace-body {
   position: relative;
   flex: 1;
-  height: calc(100% - 44px);
+  height: calc(100% - 46px);
   width: 100%;
 }
 
@@ -774,37 +797,46 @@ body {
   height: 100%;
 }
 
+/* ==========================================================================
+   Simulador de Navegador do Live Preview (Estilo Lovable)
+   ========================================================================== */
 .preview-responsive-toolbar {
-  height: 38px;
-  background-color: var(--bg-subtle);
+  height: 42px;
+  background-color: var(--bg-main);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.85rem;
+  padding: 0 1rem;
 }
 
 .device-switcher {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
 }
 
 .device-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.55rem;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: transparent;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.device-btn i {
+  width: 14px;
+  height: 14px;
 }
 
 .device-btn.active {
-  background-color: var(--bg-main);
+  background-color: var(--bg-subtle);
   border-color: var(--border-color);
   color: var(--text-main);
   font-weight: 600;
@@ -813,40 +845,45 @@ body {
 .preview-url-bar {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  background-color: var(--bg-main);
+  gap: 0.45rem;
+  background-color: var(--bg-subtle);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-pill);
-  padding: 0.2rem 0.75rem;
-  font-size: 0.72rem;
+  padding: 0.25rem 0.85rem;
+  font-size: 0.74rem;
   font-family: var(--font-mono);
   color: var(--text-secondary);
 }
 
 .preview-url-bar i {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   color: var(--accent-green);
 }
 
 .preview-frame-container {
   flex: 1;
-  background-color: #E2E8F0;
+  background-color: #F1F5F9;
   display: flex;
   justify-content: center;
-  padding: 8px;
+  align-items: stretch;
+  padding: 12px;
+  overflow: hidden;
 }
 
 #preview-iframe {
   width: 100%;
   height: 100%;
-  border: none;
+  border: 1px solid var(--border-color);
   background-color: #FFFFFF;
-  border-radius: 6px;
-  box-shadow: var(--shadow-sm);
-  transition: width 0.2s ease;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-browser);
+  transition: max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ==========================================================================
+   Componentes de Botões Genéricos
+   ========================================================================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -857,6 +894,7 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   border: 1px solid transparent;
+  transition: all 0.15s ease;
 }
 
 .btn i {
@@ -886,6 +924,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .btn-icon i {
@@ -899,10 +938,17 @@ body {
   border: 1px solid var(--accent-red);
 }
 
+.btn-danger-outline:hover {
+  background-color: #FEF2F2;
+}
+
+/* ==========================================================================
+   Modais e Notificações (Toasts)
+   ========================================================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.4);
+  background-color: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(4px);
   display: none;
   align-items: center;
@@ -966,7 +1012,7 @@ body {
 .input-readonly {
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   padding: 0.5rem 0.75rem;
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -979,7 +1025,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-color);
   font-size: 0.8rem;
@@ -1016,6 +1062,12 @@ body {
   gap: 0.6rem;
   font-size: 0.82rem;
   color: var(--text-main);
+  animation: toastIn 0.2s ease;
+}
+
+@keyframes toastIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 .toast i {
@@ -1027,6 +1079,9 @@ body {
 .toast.error i { color: var(--accent-red); }
 .toast.info i { color: var(--accent-blue); }
 
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
 @media (max-width: 1024px) {
   .main-layout {
     grid-template-columns: 380px 1fr;
@@ -1046,11 +1101,14 @@ body {
     height: auto;
   }
   .chat-panel {
-    height: 540px;
+    height: 520px;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
   }
   .workspace-panel {
-    height: 600px;
+    height: 640px;
+  }
+  .model-badge {
+    display: none;
   }
 }

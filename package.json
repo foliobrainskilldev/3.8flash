@@ -1,7 +1,7 @@
 {
   "name": "codeforge-ai",
   "version": "1.0.0",
-  "description": "Gerador de código-fonte profissional com IA através da OpenRouter - Otimizado para Render",
+  "description": "CodeForge AI — Gerador e Renderizador de Aplicações com IA estilo Lovable",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -9,10 +9,12 @@
   },
   "keywords": [
     "ai",
+    "lovable",
     "code-generator",
     "openrouter",
-    "monaco-editor",
-    "render-ready"
+    "nemotron",
+    "tailwind",
+    "live-preview"
   ],
   "author": "CodeForge AI Team",
   "license": "MIT",

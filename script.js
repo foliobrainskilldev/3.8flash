@@ -1,6 +1,6 @@
 /**
- * CODEFORGE AI — Lógica do Frontend
- * Atualizado com tratamento resiliente de respostas compiladas e proteção de renderização
+ * CODEFORGE AI — Lógica do Frontend (Estilo Lovable)
+ * Renderização direta da aplicação em tempo real com Tailwind CSS, Monaco Editor e SSE
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,29 +8,188 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const state = {
     currentProject: {
-      projectName: 'Novo Projeto',
-      description: '',
-      summary: '',
+      projectName: 'Clínica Sorriso Saudável',
+      description: 'Website de exemplo pronto a usar',
+      summary: 'Website inicial renderizado com Tailwind CSS e marcação de consultas.',
       files: [
         {
           name: 'index.html',
           language: 'html',
-          content: '<!DOCTYPE html>\n<html lang="pt">\n<head>\n  <meta charset="UTF-8">\n  <title>CodeForge AI App</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <div class="welcome-box">\n    <h1>CodeForge AI</h1>\n    <p>Pronto. Descreva a aplicação desejada na caixa à esquerda.</p>\n  </div>\n  <script src="script.js"></script>\n</body>\n</html>'
+          content: `<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorriso & Saúde — Clínica Odontológica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  
+  <!-- Navegação -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-slate-900">Sorriso<span class="text-blue-600">Saúde</span></span>
+      </div>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+        <a href="#servicos" class="hover:text-blue-600 transition">Tratamentos</a>
+        <a href="#equipa" class="hover:text-blue-600 transition">Corpo Clínico</a>
+        <a href="#marcacao" class="hover:text-blue-600 transition">Contactos</a>
+      </nav>
+      <button onclick="document.getElementById('marcacao').scrollIntoView({behavior:'smooth'})" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition">
+        Marcar Consulta
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="max-w-6xl mx-auto px-4 py-20 text-center">
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 mb-6">
+      <i data-lucide="shield-check" class="w-4 h-4"></i> Atendimento de Excelência
+    </span>
+    <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl mx-auto leading-tight">
+      O cuidado moderno que o seu sorriso merece.
+    </h1>
+    <p class="mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+      Tecnologia de ponta, profissionais especializados e ambiente confortável para transformar a sua saúde oral com total tranquilidade.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-4">
+      <button onclick="document.getElementById('marcacao').scrollIntoView({behavior:'smooth'})" class="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition">
+        Agendar Primeira Consulta
+      </button>
+      <a href="#servicos" class="px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-semibold transition">
+        Ver Tratamentos
+      </a>
+    </div>
+  </section>
+
+  <!-- Serviços -->
+  <section id="servicos" class="max-w-6xl mx-auto px-4 py-16">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-slate-900">Especialidades Clínicas</h2>
+      <p class="text-slate-600 mt-2">Soluções completas para toda a família.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6">
+          <i data-lucide="smile" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Ortodontia Invisível</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Alinhadores modernos, confortáveis e impercetíveis para corrigir o seu sorriso no dia a dia.</p>
+      </div>
+
+      <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
+          <i data-lucide="sparkle" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Branqueamento a Laser</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Resultados visíveis logo na primeira sessão através de tecnologia laser indolor e segura.</p>
+      </div>
+
+      <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6">
+          <i data-lucide="award" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Implantes e Reabilitação</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Devolução total da mastigação e confiança estética com materiais de titânio de grau superior.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulário de Agendamento Interativo -->
+  <section id="marcacao" class="max-w-4xl mx-auto px-4 py-16">
+    <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-xl">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Marcação de Consulta Imediata</h2>
+        <p class="text-slate-600 text-sm mt-2">Preencha os dados abaixo para reservar o seu horário connosco.</p>
+      </div>
+      <form id="form-consulta" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Nome Completo</label>
+            <input type="text" id="paciente-nome" required placeholder="Ex: Maria Fernandes" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Telemóvel / WhatsApp</label>
+            <input type="tel" id="paciente-tel" required placeholder="Ex: 912 345 678" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Tratamento Desejado</label>
+            <select id="paciente-servico" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm bg-white">
+              <option>Consulta de Avaliação</option>
+              <option>Branqueamento Dentário</option>
+              <option>Ortodontia (Aparelhos)</option>
+              <option>Limpeza / Destartarização</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Data Preferencial</label>
+            <input type="date" id="paciente-data" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-base shadow-lg transition">
+          Confirmar Marcação Online
+        </button>
+      </form>
+      <div id="mensagem-sucesso" class="hidden mt-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-center font-medium"></div>
+    </div>
+  </section>
+
+  <!-- Rodapé -->
+  <footer class="border-t border-slate-200 py-10 bg-white text-center text-xs text-slate-500">
+    <p>© 2026 Sorriso & Saúde. Desenvolvido e Renderizado via CodeForge Lovable Engine.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>`
         },
         {
           name: 'style.css',
           language: 'css',
-          content: 'body {\n  font-family: sans-serif;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  height: 100vh;\n  margin: 0;\n  background-color: #F8FAFC;\n  color: #0F172A;\n}\n\n.welcome-box {\n  text-align: center;\n  background: #FFFFFF;\n  padding: 2.5rem;\n  border-radius: 12px;\n  border: 1px solid #E2E8F0;\n  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);\n}'
+          content: '/* Estilos complementares de animação e utilitários */\nhtml { scroll-behavior: smooth; }\n.btn-pulse:active { transform: scale(0.98); }'
         },
         {
           name: 'script.js',
           language: 'javascript',
-          content: '// Código funcional da aplicação\nconsole.log("CodeForge AI: Pronto.");'
+          content: `document.addEventListener('DOMContentLoaded', () => {
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
+  const form = document.getElementById('form-consulta');
+  const alertBox = document.getElementById('mensagem-sucesso');
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('paciente-nome').value;
+      const data = document.getElementById('paciente-data').value;
+      
+      alertBox.textContent = 'Obrigado, ' + nome + '! O seu agendamento para ' + data + ' foi submetido com sucesso.';
+      alertBox.classList.remove('hidden');
+      form.reset();
+      
+      setTimeout(() => {
+        alertBox.classList.add('hidden');
+      }, 6000);
+    });
+  }
+});`
         }
       ]
     },
     activeFile: 'index.html',
-    activeView: 'code',
+    activeView: 'preview', // PREVIEW É O PADRÃO (ESTILO LOVABLE)
     isGenerating: false,
     conversationHistory: [],
     monacoInstance: null,
@@ -78,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     toastContainer: document.getElementById('toast-container')
   };
 
+  // Inicializador do Monaco Editor
   function initMonacoEditor() {
     window.require.config({ 
       paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } 
@@ -101,11 +261,13 @@ document.addEventListener('DOMContentLoaded', () => {
         tabSize: 2
       });
 
+      // Hot-reload dinâmico do Preview ao editar o código
       state.monacoInstance.onDidChangeModelContent(() => {
         const fileObj = state.currentProject.files.find(f => f.name === state.activeFile);
         if (fileObj) {
           fileObj.content = state.monacoInstance.getValue();
           saveStateToStorage();
+          updatePreview();
         }
       });
 
@@ -119,8 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filename.endsWith('.css')) return 'css';
     if (filename.endsWith('.js') || filename.endsWith('.mjs')) return 'javascript';
     if (filename.endsWith('.json')) return 'json';
-    if (filename.endsWith('.py')) return 'python';
-    if (filename.endsWith('.svg')) return 'xml';
     return 'plaintext';
   }
 
@@ -135,10 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (file.name.endsWith('.html')) iconName = 'code';
       if (file.name.endsWith('.css')) iconName = 'palette';
       if (file.name.endsWith('.js')) iconName = 'file-text';
-      if (file.name.endsWith('.json')) iconName = 'database';
 
       tab.innerHTML = `<i data-lucide="${iconName}"></i><span>${file.name}</span>`;
-      tab.addEventListener('click', () => selectFile(file.name));
+      tab.addEventListener('click', () => {
+        switchView('code');
+        selectFile(file.name);
+      });
 
       elements.fileTabsBar.appendChild(tab);
     });
@@ -156,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFileTabs();
   }
 
+  // Motor de Sandbox do Live Preview (Gera a aplicação viva na tela)
   function updatePreview() {
     const htmlFile = state.currentProject.files.find(f => f.name.endsWith('.html')) || state.currentProject.files[0];
     const cssFile = state.currentProject.files.find(f => f.name.endsWith('.css'));
@@ -168,6 +331,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let bundle = htmlFile.content;
 
+    // Garante que o Tailwind CSS e Lucide Icons estão sempre presentes para o render funcionar
+    if (!bundle.includes('cdn.tailwindcss.com')) {
+      bundle = bundle.replace('<head>', '<head>\n<script src="https://cdn.tailwindcss.com"></script>');
+    }
+    if (!bundle.includes('unpkg.com/lucide')) {
+      bundle = bundle.replace('<head>', '<head>\n<script src="https://unpkg.com/lucide@latest"></script>');
+    }
+
+    // Injeta CSS
     if (cssFile && cssFile.content) {
       if (bundle.includes('</head>')) {
         bundle = bundle.replace('</head>', `<style>\n${cssFile.content}\n</style>\n</head>`);
@@ -176,22 +348,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    if (jsFile && jsFile.content) {
-      const safeJs = `
-        <script>
-          try {
-            ${jsFile.content}
-          } catch(err) {
-            console.error("Erro no Preview:", err);
-          }
-        </script>
-      `;
+    // Injeta JS e inicializa Lucide de imediato dentro do iframe
+    const safeJs = `
+      <script>
+        try {
+          ${jsFile ? jsFile.content : ''}
+          window.addEventListener('load', () => { if (window.lucide) lucide.createIcons(); });
+        } catch(err) {
+          console.error("Erro na aplicação:", err);
+        }
+      </script>
+    `;
 
-      if (bundle.includes('</body>')) {
-        bundle = bundle.replace('</body>', `${safeJs}\n</body>`);
-      } else {
-        bundle = bundle + safeJs;
-      }
+    if (bundle.includes('</body>')) {
+      bundle = bundle.replace('</body>', `${safeJs}\n</body>`);
+    } else {
+      bundle = bundle + safeJs;
     }
 
     elements.previewIframe.srcdoc = bundle;
@@ -229,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   elements.btnRefreshPreview.addEventListener('click', () => {
     updatePreview();
-    showToast('Pré-visualização atualizada.', 'info');
+    showToast('Aplicação recarregada.', 'info');
   });
 
   elements.btnOpenWindow.addEventListener('click', () => {
@@ -238,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
       newWindow.document.write(elements.previewIframe.srcdoc);
       newWindow.document.close();
     } else {
-      showToast('Permita popups para abrir em nova janela.', 'error');
+      showToast('Permita popups para abrir o website.', 'error');
     }
   });
 
@@ -260,10 +432,10 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="thinking-bubble">
         <div class="thinking-header">
           <div class="pulse-dot"></div>
-          <span id="thinking-model-title">Nemotron 3 Ultra em execução...</span>
+          <span id="thinking-model-title">Lovable Engine a construir...</span>
           <span class="thinking-counter-badge" id="thinking-counter-badge">A ligar</span>
         </div>
-        <div class="thinking-status-text" id="thinking-step-text">A contactar a OpenRouter...</div>
+        <div class="thinking-status-text" id="thinking-step-text">A contactar a inteligência artificial...</div>
       </div>
     `;
 
@@ -278,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       updateCount: (chars) => {
         const badge = document.getElementById('thinking-counter-badge');
-        if (badge) badge.textContent = `${chars.toLocaleString()} chars gerados`;
+        if (badge) badge.textContent = `${chars.toLocaleString()} caracteres`;
       },
       remove: () => {
         const elem = document.getElementById('active-thinking-bubble');
@@ -287,6 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // Submissão com Auto-Switch para o Live Preview (Experiência Lovable)
   async function submitInstruction(instructionText) {
     if (!instructionText || state.isGenerating) return;
 
@@ -358,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (!projectPayload || !projectPayload.files || projectPayload.files.length === 0) {
-        throw new Error('Não foi possível estruturar os arquivos devolvidos.');
+        throw new Error('Não foi possível estruturar os arquivos.');
       }
 
       state.currentProject = projectPayload;
@@ -379,9 +552,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       renderFileTabs();
+
+      // Transição automática para o Live Preview (Tal como no Lovable.dev)
+      switchView('preview');
       updatePreview();
       saveStateToStorage();
-      showToast('Código compilado com sucesso.', 'success');
+      showToast('Website renderizado e pronto a usar.', 'success');
 
     } catch (err) {
       thinkingUI.remove();
@@ -404,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.submitIcon.setAttribute('data-lucide', 'loader-2');
       elements.submitIcon.classList.add('spin-animation');
     } else {
-      elements.submitIcon.setAttribute('data-lucide', 'audio-waveform');
+      elements.submitIcon.setAttribute('data-lucide', 'play');
       elements.submitIcon.classList.remove('spin-animation');
     }
     lucide.createIcons();
@@ -420,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (role === 'assistant') {
       const header = document.createElement('div');
       header.className = 'bubble-header';
-      header.innerHTML = '<i data-lucide="sparkles"></i><span>CodeForge Engine</span>';
+      header.innerHTML = '<i data-lucide="sparkles"></i><span>Lovable Engine</span>';
       body.appendChild(header);
     }
 
@@ -477,11 +653,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   elements.chipFix.addEventListener('click', () => {
-    submitInstruction('Analise todos os arquivos atuais, corrija erros e garanta total estabilidade.');
+    submitInstruction('Analise o código, corrija possíveis problemas de layout no Tailwind ou erros de JavaScript e melhore a usabilidade do site.');
   });
 
   elements.chipImprove.addEventListener('click', () => {
-    submitInstruction('Aprimore a tipografia, o contraste visual e o espaçamento dos componentes existentes.');
+    submitInstruction('Eleve o nível estético da aplicação: adicione animações suaves, sombras refinadas e melhore a responsividade com Tailwind CSS.');
   });
 
   elements.btnCopyCode.addEventListener('click', async () => {
@@ -535,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   elements.btnNewProject.addEventListener('click', () => {
-    if (confirm('Deseja iniciar um novo projeto? Todo o histórico não guardado será redefinido.')) {
+    if (confirm('Deseja iniciar um novo projeto? O histórico atual será limpo.')) {
       localStorage.removeItem('codeforge_saved_state');
       window.location.reload();
     }
@@ -549,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data.hasApiKey) {
         elements.apiStatusBadge.className = 'status-badge online';
-        elements.apiStatusText.textContent = 'Render Conectado';
+        elements.apiStatusText.textContent = 'Lovable Online';
         elements.modalKeyStatus.style.borderColor = 'var(--accent-green)';
         elements.modalKeyText.textContent = 'OPENROUTER_API_KEY ativa no Render.';
       } else {
@@ -562,8 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (state.serverWakeRetries < 3) {
         state.serverWakeRetries++;
         elements.apiStatusBadge.className = 'status-badge offline';
-        elements.apiStatusText.textContent = 'A acordar servidor...';
-        elements.modalKeyText.textContent = 'Instância do Render em Cold Start. Aguarde...';
+        elements.apiStatusText.textContent = 'A ligar servidor...';
         setTimeout(checkServerStatus, 3500);
       } else {
         elements.apiStatusBadge.className = 'status-badge offline';
@@ -577,7 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
   elements.btnConfirmSettings.addEventListener('click', () => elements.settingsModal.classList.remove('active'));
 
   elements.btnClearStorage.addEventListener('click', () => {
-    if (confirm('Deseja limpar todos os dados salvos localmente?')) {
+    if (confirm('Deseja limpar os dados salvos localmente?')) {
       localStorage.removeItem('codeforge_saved_state');
       showToast('Armazenamento local limpo.', 'info');
       setTimeout(() => window.location.reload(), 600);
